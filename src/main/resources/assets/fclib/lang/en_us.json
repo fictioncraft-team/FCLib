@@ -1,5 +1,8 @@
 {
-  "itemGroup.FCLib": "FCLib Mods Items",
+  "itemGroup.FCLib": "FCLib Mods",
   "fclib.keybinds.category": "FCLib Keybinds",
-  "fclib.shiftInfo": "§8Hold §f<Sneak> §8For More Info"
+  "fclib.shiftInfo": "§8Hold §f<Sneak> §8For More Info",
+  "fclib.reload.failed.fileNotFound": "§cFCLib Error: Config file not found! Generating config file...",
+  "fclib.reload.failed.targetNotFound": "§cFCLib Error: Target not found!",
+  "fclib.reload.success": "§aReload Success!"
 }
