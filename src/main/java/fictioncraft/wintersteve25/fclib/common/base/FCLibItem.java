@@ -1,6 +1,7 @@
 package fictioncraft.wintersteve25.fclib.common.base;
 
 import fictioncraft.wintersteve25.fclib.common.interfaces.IColoredName;
+import fictioncraft.wintersteve25.fclib.common.interfaces.IFCDataGenObject;
 import fictioncraft.wintersteve25.fclib.common.interfaces.IHasToolTip;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.ITooltipFlag;
@@ -13,9 +14,13 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class FCLibItem extends Item {
-    public FCLibItem(Properties properties) {
+public class FCLibItem extends Item implements IFCDataGenObject<Item> {
+    private final String regName;
+
+    public FCLibItem(Properties properties, String regName) {
         super(properties);
+
+        this.regName = regName;
     }
 
     @Override
@@ -37,5 +42,15 @@ public class FCLibItem extends Item {
                 tooltip.add(new TranslationTextComponent("fclib.shiftInfo"));
             }
         }
+    }
+
+    @Override
+    public String regName() {
+        return regName;
+    }
+
+    @Override
+    public Item getOg() {
+        return this;
     }
 }

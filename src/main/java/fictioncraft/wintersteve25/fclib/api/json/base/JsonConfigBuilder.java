@@ -1,12 +1,12 @@
-package fictioncraft.wintersteve25.fclib.common.json.base;
+package fictioncraft.wintersteve25.fclib.api.json.base;
 
 import fictioncraft.wintersteve25.fclib.common.helper.MiscHelper;
-import fictioncraft.wintersteve25.fclib.common.json.objects.SimpleConfigObject;
-import fictioncraft.wintersteve25.fclib.common.json.objects.SimpleObjectMap;
-import fictioncraft.wintersteve25.fclib.common.json.objects.providers.SimpleBlockProvider;
-import fictioncraft.wintersteve25.fclib.common.json.objects.providers.SimpleEntityProvider;
-import fictioncraft.wintersteve25.fclib.common.json.objects.providers.SimpleFluidProvider;
-import fictioncraft.wintersteve25.fclib.common.json.objects.providers.SimpleItemProvider;
+import fictioncraft.wintersteve25.fclib.api.json.objects.SimpleConfigObject;
+import fictioncraft.wintersteve25.fclib.api.json.objects.SimpleObjectMap;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.SimpleBlockProvider;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.SimpleEntityProvider;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.SimpleFluidProvider;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.SimpleItemProvider;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.ArrayList;

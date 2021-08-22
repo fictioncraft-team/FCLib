@@ -8,15 +8,13 @@ import net.minecraft.block.material.Material;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.Tags;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class MiscHelper {
@@ -45,6 +43,10 @@ public class MiscHelper {
     }
 
     public static boolean isListValid(List<?> in) {
+        return in != null && !in.isEmpty();
+    }
+
+    public static boolean isMapValid(Map<?, ?> in) {
         return in != null && !in.isEmpty();
     }
 
@@ -90,6 +92,17 @@ public class MiscHelper {
         StringBuilder sb = new StringBuilder(string);
         sb.deleteCharAt(index);
         return sb.toString();
+    }
+
+    public static String removeChar(String st, char c) {
+        char[] array = st.toCharArray();
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] == c) {
+                return removeCharAt(st, i);
+            }
+        }
+
+        return st;
     }
 
     public static <K,V> List<K> getKeysWithValue(Map<K,V> map, V value) {

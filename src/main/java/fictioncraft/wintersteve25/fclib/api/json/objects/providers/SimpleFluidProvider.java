@@ -1,4 +1,4 @@
-package fictioncraft.wintersteve25.fclib.common.json.objects.providers;
+package fictioncraft.wintersteve25.fclib.api.json.objects.providers;
 
 public class SimpleFluidProvider extends SimpleObjProvider{
     private final int amount;

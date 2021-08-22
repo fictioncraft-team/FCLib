@@ -1,6 +1,6 @@
-package fictioncraft.wintersteve25.fclib.common.json.base;
+package fictioncraft.wintersteve25.fclib.api.json.base;
 
-import fictioncraft.wintersteve25.fclib.common.json.utils.JsonConfigManager;
+import fictioncraft.wintersteve25.fclib.api.json.utils.JsonConfigManager;
 import net.minecraft.util.ResourceLocation;
 
 public interface IJsonConfig {

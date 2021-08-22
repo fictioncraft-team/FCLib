@@ -2,7 +2,7 @@
   "itemGroup.FCLib": "FCLib Mods",
   "fclib.keybinds.category": "FCLib Keybinds",
   "fclib.shiftInfo": "§8Hold §f<Sneak> §8For More Info",
-  "fclib.reload.failed.fileNotFound": "§cFCLib Error: Config file not found! Generating config file...",
-  "fclib.reload.failed.targetNotFound": "§cFCLib Error: Target not found!",
-  "fclib.reload.success": "§aReload Success!"
+  "fclib.reload.failed.targetNotFound": "§cFCLib Error: Error found in %s §cConfig, %s §cnot found in forge registry!",
+  "fclib.reload.failed.noValidConfigs": "§cFCLib Error: No valid config found in %s §cConfig",
+  "fclib.reload.success": "§aIf you don't see any errors above, that means all FCLib Json configs reloaded successfully"
 }

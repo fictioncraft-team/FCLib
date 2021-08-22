@@ -1,10 +1,9 @@
-package fictioncraft.wintersteve25.fclib.common.json.base;
+package fictioncraft.wintersteve25.fclib.api.json.base;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import fictioncraft.wintersteve25.fclib.common.json.objects.SimpleObjectMap;
-import fictioncraft.wintersteve25.fclib.common.json.utils.JsonUtils;
-import org.apache.logging.log4j.Level;
+import fictioncraft.wintersteve25.fclib.api.json.objects.SimpleObjectMap;
+import fictioncraft.wintersteve25.fclib.api.json.utils.JsonUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -14,12 +13,13 @@ import java.io.FileReader;
 import java.io.PrintWriter;
 
 /**
- * Objecthis is an default implementation of IJsonConfig. It is used by JsonConfigBuilder if you just want simple json config. You can create your custom implementation of IJsonConfig if you need to do more advanced stuff
+ * This is an default implementation of IJsonConfig. It is used by JsonConfigBuilder if you just want simple json config. You can create your custom implementation of IJsonConfig if you need to do more advanced stuff
  */
 public abstract class JsonConfig implements IJsonConfig {
 
     //this is where the loaded data be stored in, do NOObject modify data in this
     public SimpleObjectMap configData;
+
     private SimpleObjectMap template;
     private SimpleObjectMap example;
 
@@ -54,7 +54,7 @@ public abstract class JsonConfig implements IJsonConfig {
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
                 SimpleObjectMap c = gson.fromJson(new FileReader(configFile), SimpleObjectMap.class);
                 if (c != null) {
-                    if (!c.getConfigs().isEmpty()) {
+                    if (c.getConfigs() != null && !c.getConfigs().isEmpty()) {
                         configData = c;
                     }
                 }

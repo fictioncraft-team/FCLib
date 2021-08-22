@@ -1,7 +1,7 @@
-package fictioncraft.wintersteve25.fclib.common.json.utils;
+package fictioncraft.wintersteve25.fclib.api.json.utils;
 
 import fictioncraft.wintersteve25.fclib.common.helper.MiscHelper;
-import fictioncraft.wintersteve25.fclib.common.json.base.IJsonConfig;
+import fictioncraft.wintersteve25.fclib.api.json.base.IJsonConfig;
 import net.minecraft.util.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

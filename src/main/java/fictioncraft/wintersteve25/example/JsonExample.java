@@ -1,10 +1,10 @@
 package fictioncraft.wintersteve25.example;
 
-import fictioncraft.wintersteve25.fclib.common.json.base.IJsonConfig;
-import fictioncraft.wintersteve25.fclib.common.json.objects.SimpleConfigObject;
-import fictioncraft.wintersteve25.fclib.common.json.objects.SimpleObjectMap;
-import fictioncraft.wintersteve25.fclib.common.json.objects.providers.SimpleItemProvider;
-import fictioncraft.wintersteve25.fclib.common.json.utils.JsonUtils;
+import fictioncraft.wintersteve25.fclib.api.json.base.IJsonConfig;
+import fictioncraft.wintersteve25.fclib.api.json.objects.SimpleConfigObject;
+import fictioncraft.wintersteve25.fclib.api.json.objects.SimpleObjectMap;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.SimpleItemProvider;
+import fictioncraft.wintersteve25.fclib.api.json.utils.JsonUtils;
 import net.minecraft.util.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

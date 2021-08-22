@@ -1,6 +1,6 @@
-package fictioncraft.wintersteve25.fclib.api;
+package fictioncraft.wintersteve25.fclib.api.events;
 
-import fictioncraft.wintersteve25.fclib.common.json.base.IJsonConfig;
+import fictioncraft.wintersteve25.fclib.api.json.base.IJsonConfig;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 

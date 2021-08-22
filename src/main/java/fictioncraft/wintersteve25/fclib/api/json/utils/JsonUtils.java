@@ -1,13 +1,11 @@
-package fictioncraft.wintersteve25.fclib.common.json.utils;
+package fictioncraft.wintersteve25.fclib.api.json.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import fictioncraft.wintersteve25.fclib.FCLibConfig;
-import fictioncraft.wintersteve25.fclib.api.Hooks;
-import fictioncraft.wintersteve25.fclib.api.JsonConfigEvent;
-import fictioncraft.wintersteve25.fclib.common.json.base.IJsonConfig;
-import fictioncraft.wintersteve25.fclib.common.json.objects.providers.SimpleObjProvider;
-import net.minecraftforge.fml.loading.FMLPaths;
+import fictioncraft.wintersteve25.fclib.api.events.Hooks;
+import fictioncraft.wintersteve25.fclib.api.events.JsonConfigEvent;
+import fictioncraft.wintersteve25.fclib.api.json.base.IJsonConfig;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 
@@ -15,7 +13,8 @@ import java.io.File;
 import java.io.PrintWriter;
 
 public class JsonUtils {
-    public static final File directory = new File(FMLPaths.CONFIGDIR.get() + File.separator + "fclib_configs");
+    public static final File directory = new File("fclib_configs");
+    public static final Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
     public static PrintWriter createWriter(File file, Logger logger) {
         try {
@@ -42,21 +41,6 @@ public class JsonUtils {
     }
 
     public static void writeTemplateInConfig(PrintWriter writer, Object template, Logger logger) {
-        if (template instanceof SimpleObjProvider) {
-            SimpleObjProvider provider = (SimpleObjProvider) template;
-            try {
-                logger.info("Attempting to write template in file");
-                Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                gson.excluder().excludeField(provider.getClass().getField("type"), false);
-                writer.print(gson.toJson(template));
-                writer.close();
-                return;
-            } catch (NoSuchFieldException e) {
-                e.printStackTrace();
-            }
-        }
-
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
         writer.print(gson.toJson(template));
         writer.close();
     }
@@ -67,23 +51,31 @@ public class JsonUtils {
         }
     }
 
+    public static String jsonStringFromObject(Object obj) {
+        return gson.toJson(obj);
+    }
+
     public static void createJson() {
         boolean printExample = FCLibConfig.GENERATE_EXAMPLE.get();
 
         for (IJsonConfig configs : JsonConfigManager.jsonConfigMap.keySet()) {
-            if (Hooks.onJsonLoad(configs, printExample, JsonConfigEvent.JsonConfigLoadStages.WRITE)) {
-                configs.write();
-            }
-            if (Hooks.onJsonLoad(configs, printExample, JsonConfigEvent.JsonConfigLoadStages.EXAMPLE) && printExample) {
-                configs.example();
+            if (configs != null) {
+                if (Hooks.onJsonLoad(configs, printExample, JsonConfigEvent.JsonConfigLoadStages.WRITE)) {
+                    configs.write();
+                }
+                if (Hooks.onJsonLoad(configs, printExample, JsonConfigEvent.JsonConfigLoadStages.EXAMPLE) && printExample) {
+                    configs.example();
+                }
             }
         }
     }
 
     public static void loadJson() {
         for (IJsonConfig configs : JsonConfigManager.jsonConfigMap.keySet()) {
-            if (Hooks.onJsonLoad(configs, FCLibConfig.GENERATE_EXAMPLE.get(), JsonConfigEvent.JsonConfigLoadStages.READ)) {
-                configs.read();
+            if (configs != null) {
+                if (Hooks.onJsonLoad(configs, FCLibConfig.GENERATE_EXAMPLE.get(), JsonConfigEvent.JsonConfigLoadStages.READ)) {
+                    configs.read();
+                }
             }
         }
     }

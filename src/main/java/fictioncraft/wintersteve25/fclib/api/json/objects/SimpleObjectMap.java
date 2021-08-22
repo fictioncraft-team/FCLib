@@ -1,4 +1,4 @@
-package fictioncraft.wintersteve25.fclib.common.json.objects;
+package fictioncraft.wintersteve25.fclib.api.json.objects;
 
 import java.util.List;
 import java.util.Map;

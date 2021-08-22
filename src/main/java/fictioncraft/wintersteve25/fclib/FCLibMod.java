@@ -1,9 +1,17 @@
 package fictioncraft.wintersteve25.fclib;
 
-import fictioncraft.wintersteve25.fclib.common.json.base.JsonConfigBuilder;
-import fictioncraft.wintersteve25.fclib.common.json.utils.JsonUtils;
+import com.mojang.brigadier.CommandDispatcher;
+import fictioncraft.wintersteve25.fclib.api.json.ErrorUtils;
+import fictioncraft.wintersteve25.fclib.api.json.base.JsonConfigBuilder;
+import fictioncraft.wintersteve25.fclib.api.json.commands.*;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.ProviderType;
+import fictioncraft.wintersteve25.fclib.api.json.utils.JsonUtils;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -15,10 +23,12 @@ import org.apache.logging.log4j.Logger;
 @Mod("fclib")
 public class FCLibMod {
 
-    static Logger logger = LogManager.getLogger("FCLib");
+    public static Logger logger = LogManager.getLogger("FCLib");
 
     public FCLibMod() {
         final IEventBus forgeEventBus = MinecraftForge.EVENT_BUS;
+
+        new JsonConfigBuilder(new ResourceLocation("fclib_test", "test")).addItemTarget(false, "minecraft:e", 1, "", false).build();
 
         logger.info("o/ Hi! I hope you are having a wonderful day :)");
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, FCLibConfig.SERVER_CONFIG);
@@ -27,11 +37,27 @@ public class FCLibMod {
         JsonUtils.createJson();
 
         forgeEventBus.addListener(FCLibMod::serverStarted);
+        forgeEventBus.addListener(FCLibMod::playerLogIn);
+        forgeEventBus.addListener(FCLibMod::registerCommands);
         forgeEventBus.register(this);
     }
 
     public static void serverStarted(final FMLServerStartedEvent event) {
         logger.info("Loading Jsons...");
         JsonUtils.loadJson();
+    }
+
+    public static void playerLogIn(PlayerEvent.PlayerLoggedInEvent event) {
+        ErrorUtils.handle(event.getPlayer());
+    }
+
+    public static void registerCommands(RegisterCommandsEvent event) {
+        CommandDispatcher<CommandSource> dispatcher = event.getDispatcher();
+
+        dispatcher.register(Commands.literal("fclib")
+                .then(DumpInfoCommand.register(dispatcher))
+                .then(SimpleCommands.registerReloadCommand(dispatcher)));
+
+        logger.info("Registered Commands!");
     }
 }
