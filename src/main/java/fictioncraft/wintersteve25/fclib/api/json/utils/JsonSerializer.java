@@ -26,8 +26,6 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 
-import static fictioncraft.wintersteve25.fclib.api.json.objects.providers.ProviderType.*;
-
 @SuppressWarnings("all")
 public class JsonSerializer {
     public static Logger logger = LogManager.getLogger("FCLibJsonSerializer");
@@ -41,17 +39,19 @@ public class JsonSerializer {
 
     public static ITag getTagFromJson(String name, ProviderType type) {
         if (MiscHelper.isStringValid(name)) {
-            if (BLOCK.equals(type)) {
-                return TagCollectionManager.getManager().getBlockTags().getTagByID(new ResourceLocation(name));
-            } else if (ITEM.equals(type)) {
-                return TagCollectionManager.getManager().getItemTags().getTagByID(new ResourceLocation(name));
-            } else if (FLUID.equals(type)) {
-                return TagCollectionManager.getManager().getFluidTags().getTagByID(new ResourceLocation(name));
-            } else if (ENTITY.equals(type)) {
-                return TagCollectionManager.getManager().getEntityTypeTags().getTagByID(new ResourceLocation(name));
+            switch (type) {
+                case BLOCK:
+                    return TagCollectionManager.getManager().getBlockTags().getTagByID(new ResourceLocation(name));
+                case ITEM:
+                    return TagCollectionManager.getManager().getItemTags().getTagByID(new ResourceLocation(name));
+                case FLUID:
+                    return TagCollectionManager.getManager().getFluidTags().getTagByID(new ResourceLocation(name));
+                case ENTITY:
+                    return TagCollectionManager.getManager().getEntityTypeTags().getTagByID(new ResourceLocation(name));
+                default:
+                    if (type.getTagSerializer() == null) return null;
+                    return type.getTagSerializer().apply(new ResourceLocation(name));
             }
-            if (type.getTagSerializer() == null) return null;
-            return type.getTagSerializer().apply(new ResourceLocation(name));
         }
         return null;
     }
@@ -69,17 +69,19 @@ public class JsonSerializer {
 
         ResourceLocation rl = new ResourceLocation(jsonIn.getName());
 
-        if (ITEM.equals(jsonIn.getType())) {
-            return MiscHelper.isItemValid(ForgeRegistries.ITEMS.getValue(rl));
-        } else if (BLOCK.equals(jsonIn.getType())) {
-            return MiscHelper.isBlockValid(ForgeRegistries.BLOCKS.getValue(rl));
-        } else if (FLUID.equals(jsonIn.getType())) {
-            return MiscHelper.isFluidValid(ForgeRegistries.FLUIDS.getValue(rl));
-        } else if (ENTITY.equals(jsonIn.getType())) {
-            return ForgeRegistries.ENTITIES.getValue(rl) != null;
+        switch (jsonIn.getType()) {
+            case ITEM:
+                return MiscHelper.isItemValid(ForgeRegistries.ITEMS.getValue(rl));
+            case BLOCK:
+                return MiscHelper.isBlockValid(ForgeRegistries.BLOCKS.getValue(rl));
+            case FLUID:
+                return MiscHelper.isFluidValid(ForgeRegistries.FLUIDS.getValue(rl));
+            case ENTITY:
+                return ForgeRegistries.ENTITIES.getValue(rl) != null;
+            default:
+                if (jsonIn.getType().getIsTargetValidSerializer() == null) return false;
+                return jsonIn.getType().getIsTargetValidSerializer().test(rl);
         }
-        if (jsonIn.getType().getIsTargetValidSerializer() == null) return false;
-        return jsonIn.getType().getIsTargetValidSerializer().test(rl);
     }
 
     public static class ItemStackSerializer {
