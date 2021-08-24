@@ -4,5 +4,6 @@
   "fclib.shiftInfo": "§8Hold §f<Sneak> §8For More Info",
   "fclib.reload.failed.targetNotFound": "§cFCLib Error: Error found in %s §cConfig, %s §cnot found in forge registry!",
   "fclib.reload.failed.noValidConfigs": "§cFCLib Error: No valid config found in %s §cConfig",
-  "fclib.reload.success": "§aIf you don't see any errors above, that means all FCLib Json configs reloaded successfully"
+  "fclib.reload.success": "§aIf you don't see any errors above, that means all FCLib Json configs reloaded successfully",
+  "fclib.reload.useForgeDimension": "Don't use this command. Use /forge dimensions"
 }

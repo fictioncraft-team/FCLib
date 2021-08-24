@@ -28,8 +28,6 @@ public class FCLibMod {
     public FCLibMod() {
         final IEventBus forgeEventBus = MinecraftForge.EVENT_BUS;
 
-        new JsonConfigBuilder(new ResourceLocation("fclib_test", "test")).addItemTarget(false, "minecraft:e", 1, "", false).build();
-
         logger.info("o/ Hi! I hope you are having a wonderful day :)");
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, FCLibConfig.SERVER_CONFIG);
 

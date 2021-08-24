@@ -1,5 +1,9 @@
 {
   "itemGroup.FCLib": "FCLib物品",
   "fclib.keybinds.category": "FCLib快捷键",
-  "fclib.shiftInfo": "§8按住§f<潜行>§8阅读注释"
+  "fclib.shiftInfo": "§8按住§f<潜行>§8阅读注释",
+  "fclib.reload.failed.targetNotFound": "§cFCLib错误: 在%s§c配置文件发现错误,%s§c并不存在于Forge注册列表内!",
+  "fclib.reload.failed.noValidConfigs": "§ccFCLib错误: 未能在%s§c配置文件中发现有效配置",
+  "fclib.reload.success": "§a如上方没有任何错误，所有FCLib的Json配置文件都以成功全部重新加载",
+  "fclib.reload.useForgeDimension": "不要使用此命令，使用/forge dimensions如要查看已注册的次元"
 }
