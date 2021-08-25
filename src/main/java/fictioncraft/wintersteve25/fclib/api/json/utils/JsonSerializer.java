@@ -17,6 +17,7 @@ import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.tags.ITag;
 import net.minecraft.tags.TagCollectionManager;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -78,6 +79,8 @@ public class JsonSerializer {
                 return MiscHelper.isFluidValid(ForgeRegistries.FLUIDS.getValue(rl));
             case ENTITY:
                 return ForgeRegistries.ENTITIES.getValue(rl) != null;
+            case DIMENSION:
+                return Registry.DIMENSION_TYPE_KEY.
             default:
                 if (jsonIn.getType().getIsTargetValidSerializer() == null) return false;
                 return jsonIn.getType().getIsTargetValidSerializer().test(rl);

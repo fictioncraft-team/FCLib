@@ -10,6 +10,7 @@ import net.minecraftforge.common.IExtensibleEnum;
 import fictioncraft.wintersteve25.fclib.api.json.utils.JsonSerializer;
 import fictioncraft.wintersteve25.fclib.api.json.commands.DumpInfoCommand;
 
+import javax.annotation.Nullable;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -28,8 +29,11 @@ public enum ProviderType {
     OTHERS("Others", null, null, null);
 
     private final String id;
+    @Nullable
     private final Function<ResourceLocation, ITag> tagSerializer;
+    @Nullable
     private final Predicate<ResourceLocation> isTargetValidSerializer;
+    @Nullable
     private final Function4<ServerPlayerEntity, ItemStack, Boolean, Integer, Integer> commandProcessor;
 
     /**
@@ -38,7 +42,7 @@ public enum ProviderType {
      * @param isTargetValidSerializer Used in {@link JsonSerializer#isValidTarget(SimpleObjProvider)} to check if a provided target from json is an valid object in registry
      * @param commandProcessor Used in {@link fictioncraft.wintersteve25.fclib.api.json.commands.DumpInfoCommand#run(CommandContext)} to process the command and output appropriate info
      */
-    ProviderType(String id, Function<ResourceLocation, ITag> tagSerializer, Predicate<ResourceLocation> isTargetValidSerializer, Function4<ServerPlayerEntity, ItemStack, Boolean, Integer, Integer> commandProcessor) {
+    ProviderType(String id, @Nullable Function<ResourceLocation, ITag> tagSerializer, @Nullable Predicate<ResourceLocation> isTargetValidSerializer, @Nullable Function4<ServerPlayerEntity, ItemStack, Boolean, Integer, Integer> commandProcessor) {
         this.id = id;
         this.tagSerializer = tagSerializer;
         this.isTargetValidSerializer = isTargetValidSerializer;
@@ -49,14 +53,17 @@ public enum ProviderType {
         return id;
     }
 
+    @Nullable
     public Function<ResourceLocation, ITag> getTagSerializer() {
         return tagSerializer;
     }
 
+    @Nullable
     public Predicate<ResourceLocation> getIsTargetValidSerializer() {
         return isTargetValidSerializer;
     }
 
+    @Nullable
     public Function4<ServerPlayerEntity, ItemStack, Boolean, Integer, Integer> getCommandProcessor() {
         return commandProcessor;
     }
