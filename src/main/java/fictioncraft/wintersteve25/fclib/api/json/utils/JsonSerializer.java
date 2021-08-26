@@ -1,6 +1,11 @@
 package fictioncraft.wintersteve25.fclib.api.json.utils;
 
 import com.mojang.brigadier.StringReader;
+import fictioncraft.wintersteve25.fclib.api.json.objects.ProviderType;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.templates.SimpleBlockProvider;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.templates.SimpleEntityProvider;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.templates.SimpleFluidProvider;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.templates.SimpleItemProvider;
 import fictioncraft.wintersteve25.fclib.common.helper.MiscHelper;
 import fictioncraft.wintersteve25.fclib.common.helper.ModListHelper;
 import fictioncraft.wintersteve25.fclib.api.json.objects.providers.*;
@@ -25,13 +30,13 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 
-import static fictioncraft.wintersteve25.fclib.api.json.objects.providers.ProviderType.*;
+import static fictioncraft.wintersteve25.fclib.api.json.objects.ProviderType.*;
 
 @SuppressWarnings("all")
 public class JsonSerializer {
     public static Logger logger = LogManager.getLogger("FCLibJsonSerializer");
 
-    public static ITag getTagFromJson(IObjProvider jsonIn) {
+    public static ITag getTagFromJson(ISimpleObjProvider jsonIn) {
         if (jsonIn.isTag() && MiscHelper.isStringValid(jsonIn.getName())) {
             return getTagFromJson(jsonIn.getName(), jsonIn.getType());
         }
@@ -60,7 +65,7 @@ public class JsonSerializer {
         return TagCollectionManager.getManager().getItemTags().getTagByID(resourceLocation);
     }
 
-    public static boolean isValidTarget(IObjProvider jsonIn) {
+    public static boolean isValidTarget(ISimpleObjProvider jsonIn) {
         if (isModWildCard(jsonIn)) {
             String requiredModID = getModIDFromString(jsonIn);
             return ModListHelper.isModLoaded(requiredModID);
@@ -555,7 +560,7 @@ public class JsonSerializer {
         }
     }
 
-    public static boolean isModWildCard(IObjProvider jsonIn) {
+    public static boolean isModWildCard(ISimpleObjProvider jsonIn) {
         return isModWildCard(jsonIn.getName());
     }
 
@@ -563,7 +568,7 @@ public class JsonSerializer {
         return stringIn.charAt(0) == '*';
     }
 
-    public static String getModIDFromString(IObjProvider jsonIn) {
+    public static String getModIDFromString(ISimpleObjProvider jsonIn) {
         return getModIDFromString(jsonIn.getName());
     }
 

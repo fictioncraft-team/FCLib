@@ -8,7 +8,11 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import fictioncraft.wintersteve25.fclib.FCLibMod;
-import fictioncraft.wintersteve25.fclib.api.json.objects.providers.*;
+import fictioncraft.wintersteve25.fclib.api.json.objects.ProviderType;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.templates.SimpleBlockProvider;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.templates.SimpleEntityProvider;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.templates.SimpleFluidProvider;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.templates.SimpleItemProvider;
 import fictioncraft.wintersteve25.fclib.api.json.utils.JsonSerializer;
 import fictioncraft.wintersteve25.fclib.api.json.utils.JsonUtils;
 import fictioncraft.wintersteve25.fclib.common.helper.CommandsHelper;
@@ -27,7 +31,7 @@ import net.minecraftforge.fluids.FluidUtil;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static fictioncraft.wintersteve25.fclib.api.json.objects.providers.ProviderType.*;
+import static fictioncraft.wintersteve25.fclib.api.json.objects.ProviderType.*;
 
 public class DumpInfoCommand implements Command<CommandSource> {
 

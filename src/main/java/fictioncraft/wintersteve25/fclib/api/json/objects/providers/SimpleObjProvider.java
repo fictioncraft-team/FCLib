@@ -1,6 +1,10 @@
 package fictioncraft.wintersteve25.fclib.api.json.objects.providers;
 
-public class SimpleObjProvider implements IObjProvider {
+import com.google.gson.annotations.JsonAdapter;
+import fictioncraft.wintersteve25.fclib.api.json.objects.ProviderType;
+
+@JsonAdapter(SimpleObjProviderJsonAdapter.class)
+public class SimpleObjProvider implements ISimpleObjProvider {
     private final String name;
     private final boolean isTag;
     private final String type;

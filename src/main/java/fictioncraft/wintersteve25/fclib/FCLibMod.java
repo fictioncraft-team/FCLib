@@ -1,9 +1,10 @@
 package fictioncraft.wintersteve25.fclib;
 
 import com.mojang.brigadier.CommandDispatcher;
+import fictioncraft.wintersteve25.example.JsonExample;
 import fictioncraft.wintersteve25.fclib.api.json.ErrorUtils;
 import fictioncraft.wintersteve25.fclib.api.json.commands.*;
-import fictioncraft.wintersteve25.fclib.api.json.objects.providers.ProviderType;
+import fictioncraft.wintersteve25.fclib.api.json.objects.ProviderType;
 import fictioncraft.wintersteve25.fclib.api.json.utils.JsonUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
@@ -15,7 +16,6 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
