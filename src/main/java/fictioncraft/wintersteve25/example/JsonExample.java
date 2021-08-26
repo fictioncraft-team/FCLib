@@ -52,4 +52,9 @@ public class JsonExample implements IJsonConfig {
     public ResourceLocation UID() {
         return new ResourceLocation("fclib", "example_config");
     }
+
+    @Override
+    public SimpleObjectMap finishedConfig() {
+        return null;
+    }
 }

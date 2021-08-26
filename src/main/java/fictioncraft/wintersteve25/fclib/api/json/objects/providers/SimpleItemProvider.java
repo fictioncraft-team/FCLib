@@ -5,7 +5,7 @@ public class SimpleItemProvider extends SimpleObjProvider {
     private final String nbt;
 
     public SimpleItemProvider(String name, int amount, String nbt, boolean isTag) {
-        super(name, isTag, ProviderType.ITEM);
+        super(name, isTag, "Item");
         this.amount = amount;
         this.nbt = nbt;
     }

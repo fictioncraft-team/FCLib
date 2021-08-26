@@ -1,28 +1,28 @@
 package fictioncraft.wintersteve25.fclib.api.json.objects.providers;
 
-public class SimpleObjProvider {
+public class SimpleObjProvider implements IObjProvider {
     private final String name;
     private final boolean isTag;
-    private final ProviderType type;
+    private final String type;
 
-    public SimpleObjProvider(String name, boolean isTag, ProviderType type) {
+    public SimpleObjProvider(String name, boolean isTag, String type) {
         this.name = name;
         this.isTag = isTag;
         this.type = type;
     }
 
+    @Override
     public String getName() {
-        return name;
+        return this.name;
     }
 
+    @Override
     public boolean isTag() {
-        return isTag;
+        return this.isTag;
     }
 
-    /**
-     * ProviderType is used by getTagFromJson method in JsonSerializer class
-     */
+    @Override
     public ProviderType getType() {
-        return type;
+        return ProviderType.getFromName(this.type);
     }
 }

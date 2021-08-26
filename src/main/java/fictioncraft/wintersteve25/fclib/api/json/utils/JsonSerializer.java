@@ -17,7 +17,6 @@ import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.tags.ITag;
 import net.minecraft.tags.TagCollectionManager;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
@@ -32,7 +31,7 @@ import static fictioncraft.wintersteve25.fclib.api.json.objects.providers.Provid
 public class JsonSerializer {
     public static Logger logger = LogManager.getLogger("FCLibJsonSerializer");
 
-    public static ITag getTagFromJson(SimpleObjProvider jsonIn) {
+    public static ITag getTagFromJson(IObjProvider jsonIn) {
         if (jsonIn.isTag() && MiscHelper.isStringValid(jsonIn.getName())) {
             return getTagFromJson(jsonIn.getName(), jsonIn.getType());
         }
@@ -61,7 +60,7 @@ public class JsonSerializer {
         return TagCollectionManager.getManager().getItemTags().getTagByID(resourceLocation);
     }
 
-    public static boolean isValidTarget(SimpleObjProvider jsonIn) {
+    public static boolean isValidTarget(IObjProvider jsonIn) {
         if (isModWildCard(jsonIn)) {
             String requiredModID = getModIDFromString(jsonIn);
             return ModListHelper.isModLoaded(requiredModID);
@@ -510,7 +509,7 @@ public class JsonSerializer {
             return list;
         }
 
-        public static boolean doesEntitiesMatch(Entity entity, SimpleEntityProvider jsonIn, World world) {
+        public static boolean doesEntitiesMatch(Entity entity, SimpleEntityProvider jsonIn) {
             if (isModWildCard(jsonIn)) {
                 String entityModID = entity.getType().getRegistryName().getNamespace();
                 String requiredModID = getModIDFromString(jsonIn);
@@ -522,23 +521,8 @@ public class JsonSerializer {
                 }
                 return entity.getType().getTags().contains(getTagFromJson(jsonIn));
             } else {
-                return entity.isEntityEqual(getEntityFromJson(jsonIn, world));
+                return entity.getType().getRegistryName().toString().equals(jsonIn.getName());
             }
-        }
-
-        public static Entity getEntityFromJson(SimpleEntityProvider jsonIn, World world) {
-            String name = jsonIn.getName();
-
-            if (!jsonIn.isTag()) {
-                if (MiscHelper.isStringValid(name)) {
-                    ResourceLocation rl = new ResourceLocation(name);
-                    EntityType<?> type = ForgeRegistries.ENTITIES.getValue(rl);
-                    if (type != null) {
-                        return type.create(world);
-                    }
-                }
-            }
-            return null;
         }
 
         public static EntityType<?> getEntityTypeFromJson(SimpleEntityProvider jsonIn) {
@@ -571,7 +555,7 @@ public class JsonSerializer {
         }
     }
 
-    public static boolean isModWildCard(SimpleObjProvider jsonIn) {
+    public static boolean isModWildCard(IObjProvider jsonIn) {
         return isModWildCard(jsonIn.getName());
     }
 
@@ -579,7 +563,7 @@ public class JsonSerializer {
         return stringIn.charAt(0) == '*';
     }
 
-    public static String getModIDFromString(SimpleObjProvider jsonIn) {
+    public static String getModIDFromString(IObjProvider jsonIn) {
         return getModIDFromString(jsonIn.getName());
     }
 

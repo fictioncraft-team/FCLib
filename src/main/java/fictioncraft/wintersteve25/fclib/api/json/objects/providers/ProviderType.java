@@ -39,7 +39,7 @@ public class ProviderType {
     /**
      * @param id Used in dump commands as type
      * @param tagSerializer Used in {@link JsonSerializer#getTagFromJson(String, ProviderType)} to get ITag from a {@link ResourceLocation}
-     * @param isTargetValidSerializer Used in {@link JsonSerializer#isValidTarget(SimpleObjProvider)} to check if a provided target from json is an valid object in registry
+     * @param isTargetValidSerializer Used in {@link JsonSerializer#isValidTarget(IObjProvider)} to check if a provided target from json is an valid object in registry
      * @param commandProcessor Used in {@link DumpInfoCommand#run(CommandContext)} to process the command and output appropriate info
      */
     public ProviderType(String id, @Nullable Function<ResourceLocation, ITag> tagSerializer, @Nullable Predicate<ResourceLocation> isTargetValidSerializer, @Nullable Function4<ServerPlayerEntity, ItemStack, Boolean, Integer, Integer> commandProcessor) {

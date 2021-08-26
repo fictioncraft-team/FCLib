@@ -5,11 +5,11 @@ import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 
 /**
- * This event is fired right before json configs are loaded
+ * There are two types, Pre and Post. Pre is fired before jsons are loaded. Post is after it is loaded
  * There are 3 stages in total when loading json config: Write config, print example and lastly read config
  * This event can be canceled to prevent json being loaded/created
  */
-@Cancelable
+
 public class JsonConfigEvent extends Event {
     private final IJsonConfig config;
     private final boolean printExample;
@@ -37,5 +37,28 @@ public class JsonConfigEvent extends Event {
         WRITE,
         EXAMPLE,
         READ
+    }
+
+    @Cancelable
+    public static class Pre extends JsonConfigEvent {
+        public Pre(IJsonConfig config, boolean printExample, JsonConfigLoadStages stage) {
+            super(config, printExample, stage);
+        }
+
+        @Override
+        public boolean isCancelable() {
+            return true;
+        }
+    }
+
+    public static class Post extends JsonConfigEvent {
+        public Post(IJsonConfig config, boolean printExample, JsonConfigLoadStages stage) {
+            super(config, printExample, stage);
+        }
+
+        @Override
+        public boolean isCancelable() {
+            return false;
+        }
     }
 }

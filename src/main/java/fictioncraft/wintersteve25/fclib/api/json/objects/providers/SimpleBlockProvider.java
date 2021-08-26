@@ -6,7 +6,7 @@ public class SimpleBlockProvider extends SimpleObjProvider {
     private final String nbt;
 
     public SimpleBlockProvider(String name, boolean hasTE, String nbt, boolean isTag) {
-        super(name, isTag, ProviderType.BLOCK);
+        super(name, isTag, "Block");
         this.hasTE = hasTE;
         this.nbt = nbt;
     }

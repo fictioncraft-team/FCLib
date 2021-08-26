@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.PrintWriter;
+import java.util.function.Function;
 
 /**
  * This is an default implementation of IJsonConfig. It is used by JsonConfigBuilder if you just want simple json config. You can create your custom implementation of IJsonConfig if you need to do more advanced stuff
@@ -64,6 +65,11 @@ public abstract class JsonConfig implements IJsonConfig {
                 write();
             }
         }
+    }
+
+    @Override
+    public SimpleObjectMap finishedConfig() {
+        return configData;
     }
 
     public SimpleObjectMap getTemplate() {

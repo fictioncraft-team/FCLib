@@ -1,6 +1,7 @@
 package fictioncraft.wintersteve25.fclib.api.json.base;
 
 import fictioncraft.wintersteve25.fclib.FCLibMod;
+import fictioncraft.wintersteve25.fclib.api.json.objects.SimpleObjectMap;
 import fictioncraft.wintersteve25.fclib.api.json.utils.JsonConfigManager;
 import net.minecraft.util.ResourceLocation;
 
@@ -13,6 +14,8 @@ public interface IJsonConfig {
     void read();
 
     ResourceLocation UID();
+
+    SimpleObjectMap finishedConfig();
 
     /**
      * this method should be called in your mod constructor

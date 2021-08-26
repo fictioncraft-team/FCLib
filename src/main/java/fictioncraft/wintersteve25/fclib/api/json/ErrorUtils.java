@@ -1,8 +1,8 @@
 package fictioncraft.wintersteve25.fclib.api.json;
 
+import fictioncraft.wintersteve25.fclib.api.json.objects.SimpleObjectMap;
 import fictioncraft.wintersteve25.fclib.common.helper.MiscHelper;
 import fictioncraft.wintersteve25.fclib.api.json.base.IJsonConfig;
-import fictioncraft.wintersteve25.fclib.api.json.base.JsonConfig;
 import fictioncraft.wintersteve25.fclib.api.json.objects.SimpleConfigObject;
 import fictioncraft.wintersteve25.fclib.api.json.utils.JsonConfigManager;
 import fictioncraft.wintersteve25.fclib.api.json.utils.JsonSerializer;
@@ -31,33 +31,33 @@ public class ErrorUtils {
         sendError(text.getText(), player, config);
     }
 
-    /**
-     * The default ErrorHandler only work for JsonConfigs made with JsonConfigBuilder
-     */
     public static void handle(PlayerEntity player) {
         JsonUtils.createJson();
         JsonUtils.loadJson();
 
         for (IJsonConfig config : JsonConfigManager.jsonConfigMap.keySet()) {
-            if (config instanceof JsonConfig) {
-                JsonConfig cfg = (JsonConfig) config;
+            if (config != null && config.finishedConfig() != null) {
+                SimpleObjectMap cfg = config.finishedConfig();
 
-                if (cfg.configData == null) {
-                    sendError(ErrorTypes.NO_VALID_CONFIG, player, cfg);
+                if (cfg == null) {
+                    sendError(ErrorTypes.NO_VALID_CONFIG, player, config);
                     return;
                 }
 
-                if (!MiscHelper.isMapValid(cfg.configData.getConfigs())) {
-                    sendError(ErrorTypes.NO_VALID_CONFIG, player, cfg);
+                if (!MiscHelper.isMapValid(cfg.getConfigs())) {
+                    sendError(ErrorTypes.NO_VALID_CONFIG, player, config);
                     return;
                 }
 
-                Map<String, List<SimpleConfigObject>> map = cfg.configData.getConfigs();
+                Map<String, List<SimpleConfigObject>> map = cfg.getConfigs();
 
                 map.values().forEach((list) -> list.forEach((configObject -> {
                     if (!JsonSerializer.isValidTarget(configObject.getTarget()))
                         sendError(new TranslationTextComponent(TARGET_NOT_FOUND, config.UID(), configObject.getTarget().getName()), player);
                 })));
+            } else {
+                sendError(ErrorTypes.NO_VALID_CONFIG, player, config);
+                return;
             }
         }
 
