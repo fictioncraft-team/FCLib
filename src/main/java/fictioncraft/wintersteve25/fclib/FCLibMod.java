@@ -2,13 +2,11 @@ package fictioncraft.wintersteve25.fclib;
 
 import com.mojang.brigadier.CommandDispatcher;
 import fictioncraft.wintersteve25.fclib.api.json.ErrorUtils;
-import fictioncraft.wintersteve25.fclib.api.json.base.JsonConfigBuilder;
 import fictioncraft.wintersteve25.fclib.api.json.commands.*;
-import fictioncraft.wintersteve25.fclib.api.json.objects.providers.ProviderType;
+import fictioncraft.wintersteve25.fclib.api.json.objects.ProviderType;
 import fictioncraft.wintersteve25.fclib.api.json.utils.JsonUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -16,19 +14,21 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
+import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Mod("fclib")
 public class FCLibMod {
 
     public static Logger logger = LogManager.getLogger("FCLib");
+    public static final List<ProviderType> PROVIDER_TYPES = new ArrayList<>();
 
     public FCLibMod() {
         final IEventBus forgeEventBus = MinecraftForge.EVENT_BUS;
-
-        new JsonConfigBuilder(new ResourceLocation("fclib_test", "test")).addItemTarget(false, "minecraft:e", 1, "", false).build();
 
         logger.info("o/ Hi! I hope you are having a wonderful day :)");
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, FCLibConfig.SERVER_CONFIG);
@@ -39,12 +39,18 @@ public class FCLibMod {
         forgeEventBus.addListener(FCLibMod::serverStarted);
         forgeEventBus.addListener(FCLibMod::playerLogIn);
         forgeEventBus.addListener(FCLibMod::registerCommands);
+//        forgeEventBus.addListener(EventTest::inventoryChange);
+
         forgeEventBus.register(this);
     }
 
-    public static void serverStarted(final FMLServerStartedEvent event) {
+    public static void serverStarted(final FMLServerAboutToStartEvent event) {
         logger.info("Loading Jsons...");
         JsonUtils.loadJson();
+
+//        JsonExample jsonExample = new JsonExample();
+//        jsonExample.write();
+//        jsonExample.read();
     }
 
     public static void playerLogIn(PlayerEvent.PlayerLoggedInEvent event) {

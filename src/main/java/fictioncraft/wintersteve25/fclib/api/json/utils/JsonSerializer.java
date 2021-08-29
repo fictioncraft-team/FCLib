@@ -1,36 +1,56 @@
 package fictioncraft.wintersteve25.fclib.api.json.utils;
 
 import com.mojang.brigadier.StringReader;
+import fictioncraft.wintersteve25.fclib.api.json.objects.ProviderType;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.ISimpleObjProvider;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.templates.SimpleBlockProvider;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.templates.SimpleEntityProvider;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.templates.SimpleFluidProvider;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.templates.SimpleItemProvider;
 import fictioncraft.wintersteve25.fclib.common.helper.MiscHelper;
 import fictioncraft.wintersteve25.fclib.common.helper.ModListHelper;
-import fictioncraft.wintersteve25.fclib.api.json.objects.providers.*;
-import net.minecraft.advancements.criterion.NBTPredicate;
+import javafx.util.Pair;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.pattern.BlockStateMatcher;
 import net.minecraft.command.arguments.BlockStateParser;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.fluid.Fluid;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.JsonToNBT;
+import net.minecraft.nbt.NBTUtil;
+import net.minecraft.state.Property;
 import net.minecraft.tags.ITag;
 import net.minecraft.tags.TagCollectionManager;
+import net.minecraft.tileentity.ChestTileEntity;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.swing.text.html.Option;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static fictioncraft.wintersteve25.fclib.api.json.objects.ProviderType.*;
 
 @SuppressWarnings("all")
 public class JsonSerializer {
     public static Logger logger = LogManager.getLogger("FCLibJsonSerializer");
 
-    public static ITag getTagFromJson(SimpleObjProvider jsonIn) {
+    public static ITag getTagFromJson(ISimpleObjProvider jsonIn) {
         if (jsonIn.isTag() && MiscHelper.isStringValid(jsonIn.getName())) {
             return getTagFromJson(jsonIn.getName(), jsonIn.getType());
         }
@@ -39,96 +59,58 @@ public class JsonSerializer {
 
     public static ITag getTagFromJson(String name, ProviderType type) {
         if (MiscHelper.isStringValid(name)) {
-            switch (type) {
-                case BLOCK:
-                    return TagCollectionManager.getManager().getBlockTags().getTagByID(new ResourceLocation(name));
-                case ITEM:
-                    return TagCollectionManager.getManager().getItemTags().getTagByID(new ResourceLocation(name));
-                case FLUID:
-                    return TagCollectionManager.getManager().getFluidTags().getTagByID(new ResourceLocation(name));
-                case ENTITY:
-                    return TagCollectionManager.getManager().getEntityTypeTags().getTagByID(new ResourceLocation(name));
-                default:
-                    if (type.getTagSerializer() == null) return null;
-                    return type.getTagSerializer().apply(new ResourceLocation(name));
+            if (BLOCK.equals(type)) {
+                return TagCollectionManager.getManager().getBlockTags().getTagByID(new ResourceLocation(name));
+            } else if (ITEM.equals(type)) {
+                return TagCollectionManager.getManager().getItemTags().getTagByID(new ResourceLocation(name));
+            } else if (FLUID.equals(type)) {
+                return TagCollectionManager.getManager().getFluidTags().getTagByID(new ResourceLocation(name));
+            } else if (ENTITY.equals(type)) {
+                return TagCollectionManager.getManager().getEntityTypeTags().getTagByID(new ResourceLocation(name));
+            } else {
+                if (type.getTagSerializer() == null) return null;
+                return type.getTagSerializer().apply(new ResourceLocation(name));
             }
         }
         return null;
     }
 
-    public static ITag getItemTagFromRL(ResourceLocation resourceLocation) {
-        return TagCollectionManager.getManager().getItemTags().getTagByID(resourceLocation);
+    public static ITag getTagFromRL(ResourceLocation resourceLocation, ProviderType type) {
+        return getTagFromJson(resourceLocation.toString(), type);
     }
 
-    public static boolean isValidTarget(SimpleObjProvider jsonIn) {
+    public static boolean isValidTarget(ISimpleObjProvider jsonIn) {
         if (isModWildCard(jsonIn)) {
             String requiredModID = getModIDFromString(jsonIn);
             return ModListHelper.isModLoaded(requiredModID);
         }
         if (jsonIn.isTag()) return getTagFromJson(jsonIn) != null;
 
-        ResourceLocation rl = new ResourceLocation(jsonIn.getName());
+        String jsonInName = jsonIn.getName();
+        String processedName = jsonInName;
 
-        switch (jsonIn.getType()) {
-            case ITEM:
-                return MiscHelper.isItemValid(ForgeRegistries.ITEMS.getValue(rl));
-            case BLOCK:
-                return MiscHelper.isBlockValid(ForgeRegistries.BLOCKS.getValue(rl));
-            case FLUID:
-                return MiscHelper.isFluidValid(ForgeRegistries.FLUIDS.getValue(rl));
-            case ENTITY:
-                return ForgeRegistries.ENTITIES.getValue(rl) != null;
-            default:
-                if (jsonIn.getType().getIsTargetValidSerializer() == null) return false;
-                return jsonIn.getType().getIsTargetValidSerializer().apply(rl);
+        if (jsonInName.indexOf('[') != -1 || jsonInName.indexOf(']') != -1) {
+            processedName = jsonInName.substring(0, jsonInName.indexOf('['));
+        }
+
+        ResourceLocation rl = new ResourceLocation(processedName);
+
+        if (ITEM.equals(jsonIn.getType())) {
+            return MiscHelper.isItemValid(ForgeRegistries.ITEMS.getValue(rl));
+        } else if (BLOCK.equals(jsonIn.getType())) {
+            return MiscHelper.isBlockValid(ForgeRegistries.BLOCKS.getValue(rl));
+        } else if (FLUID.equals(jsonIn.getType())) {
+            return MiscHelper.isFluidValid(ForgeRegistries.FLUIDS.getValue(rl));
+        } else if (ENTITY.equals(jsonIn.getType())) {
+            return ForgeRegistries.ENTITIES.getValue(rl) != null;
+        } else {
+            if (jsonIn.getType() == null) return true;
+            if (jsonIn.getType().getIsTargetValidSerializer() == null) return true;
+            return jsonIn.getType().getIsTargetValidSerializer().test(rl);
         }
     }
 
     public static class ItemStackSerializer {
-
-        /**
-         * You shouldnt be using this for json input stack comparison, use doesItemStackMatch instead
-         */
-        @Deprecated
-        public static boolean areStacksSame(ItemStack stack1, ItemStack stack2, SimpleItemProvider jsonIn) {
-            return areStacksSame(stack1, stack2, jsonIn.getNBT() != null && !jsonIn.getNBT().isEmpty(), jsonIn.getAmount() != 0);
-        }
-
-        @Deprecated
-        public static boolean areStacksSame(ItemStack stack1, ItemStack stack2, boolean matchNBT, boolean matchSize) {
-            if (stack1.isItemEqual(stack2)) {
-                if (!matchNBT && !matchSize) {
-                    return true;
-                }
-
-                if (!matchSize && matchNBT) {
-                    if (!stack1.getTag().isEmpty() && !stack2.getTag().isEmpty()) {
-                        NBTPredicate predicate = new NBTPredicate(stack1.getTag());
-                        if (predicate.test(stack2)) {
-                            return true;
-                        }
-                    }
-                }
-
-                if (matchSize && !matchNBT) {
-                    if (stack1.getCount() == stack2.getCount()) {
-                        return true;
-                    }
-                }
-
-                if (matchSize && matchNBT) {
-                    if (!stack1.getTag().isEmpty() && !stack2.getTag().isEmpty() && stack1.getCount() == stack2.getCount()) {
-                        NBTPredicate predicate = new NBTPredicate(stack1.getTag());
-                        if (predicate.test(stack2)) {
-                            return true;
-                        }
-                    }
-                }
-            }
-
-            return false;
-        }
-
         public static boolean doesItemStackMatch(ItemStack stackIn, SimpleItemProvider jsonIn) {
             if (isModWildCard(jsonIn)) {
                 String stateModID = stackIn.getItem().getRegistryName().getNamespace();
@@ -142,8 +124,46 @@ public class JsonSerializer {
                 }
                 return stackIn.getItem().isIn(getTagFromJson(jsonIn));
             } else {
-                return areStacksSame(getItemStackFromJsonItemStack(jsonIn), stackIn, jsonIn);
+                return areStacksTheSame(stackIn, jsonIn);
             }
+        }
+
+        public static boolean areStacksTheSame(ItemStack stack, SimpleItemProvider provider) {
+            return areStacksTheSame(stack, getItemStackFromJsonItemStack(provider), provider.getAmount() != 0, provider.getNBT() != null && !provider.getNBT().isEmpty());
+        }
+
+        public static boolean areStacksTheSame(ItemStack stack1, ItemStack stack2, boolean matchSize, boolean matchNBT) {
+            boolean output = false;
+            if (MiscHelper.isItemValid(stack1.getItem()) && MiscHelper.isItemValid(stack2.getItem())) {
+                output = areStacksRegistryNameTheSame(stack1, stack2);
+
+                if (matchSize) {
+                    output = output && areStacksSizeTheSame(stack1, stack2);
+                }
+
+                if (matchNBT) {
+                    output = output && areStacksNBTTheSame(stack1, stack2);
+                }
+
+                return output;
+            }
+            return false;
+        }
+
+        public static boolean areStacksRegistryNameTheSame(ItemStack stack1, ItemStack stack2) {
+            return stack1.getItem().getRegistryName().toString().equals(stack2.getItem().getRegistryName().toString());
+        }
+
+        public static boolean areStacksSizeTheSame(ItemStack stack1, ItemStack stack2) {
+            return stack1.getCount() == stack2.getCount();
+        }
+
+        public static boolean areStacksNBTTheSame(ItemStack stack1, ItemStack stack2) {
+            CompoundNBT nbt1 = stack1.getTag();
+            CompoundNBT nbt2 = stack2.getTag();
+
+            if (nbt1 == null || nbt1.isEmpty() || nbt2 == null || nbt2.isEmpty()) return false;
+            return stack1.getTag().equals(stack2.getTag());
         }
 
         public static ItemStack getItemStackFromJsonItemStack(SimpleItemProvider jsonIn) {
@@ -180,8 +200,11 @@ public class JsonSerializer {
         public static ItemStack tryCreateItemStack(Item item, int amount, String nbt) {
             if (MiscHelper.isStringValid(nbt)) {
                 JsonToNBT nbtSerializer = new JsonToNBT(new StringReader(nbt));
+
                 try {
-                    return new ItemStack(item, amount, nbtSerializer.readStruct());
+                    ItemStack stack = new ItemStack(item, amount);
+                    stack.setTag(nbtSerializer.readStruct());
+                    return stack;
                 } catch (Exception e) {
                     logger.warn("NBT {} does not exist, created ItemStack without NBT", nbt);
                     return new ItemStack(item, amount);
@@ -197,7 +220,7 @@ public class JsonSerializer {
         public static List<ITag> getTagFromItem(Item item) {
             List<ITag> tags = new ArrayList<>();
             for (ResourceLocation rl : TagCollectionManager.getManager().getItemTags().getOwningTags(item)) {
-                ITag tag = getItemTagFromRL(rl);
+                ITag tag = getTagFromRL(rl, ITEM);
                 if (tag != null) {
                     tags.add(tag);
                 }
@@ -254,7 +277,7 @@ public class JsonSerializer {
         public static List<ITag> getTagFromBlock(Block block) {
             List<ITag> tags = new ArrayList<>();
             for (ResourceLocation rl : TagCollectionManager.getManager().getBlockTags().getOwningTags(block)) {
-                ITag tag = getItemTagFromRL(rl);
+                ITag tag = getTagFromRL(rl, BLOCK);
                 if (tag != null) {
                     tags.add(tag);
                 }
@@ -272,7 +295,25 @@ public class JsonSerializer {
             return list;
         }
 
-        public static boolean doesBlockMatch(BlockState stateIn, SimpleBlockProvider jsonIn) {
+        public static Pair<BlockState, Optional<CompoundNBT>> getPair(World world, BlockPos pos) {
+            TileEntity te = world.getTileEntity(pos);
+            BlockState state = world.getBlockState(pos);
+
+            if (te != null) {
+                CompoundNBT nbt = te.getTileData();
+                if (nbt != null && !nbt.isEmpty()) {
+                    return new Pair<>(state, Optional.of(nbt));
+                }
+            }
+            return new Pair<>(state, Optional.empty());
+        }
+
+        public static boolean doesBlockMatch(Pair<BlockState, Optional<CompoundNBT>> pairIn, SimpleBlockProvider jsonIn) {
+            BlockState stateIn = pairIn.getKey();
+            Optional<CompoundNBT> nbtOptional = pairIn.getValue();
+
+            boolean matchNBT = jsonIn.hasTE() && jsonIn.getNbt() != null && !jsonIn.getNbt().isEmpty();
+
             if (isModWildCard(jsonIn)) {
                 String stateModID = stateIn.getBlock().getRegistryName().getNamespace();
                 String requiredModID = getModIDFromString(jsonIn);
@@ -285,66 +326,74 @@ public class JsonSerializer {
                 }
                 return stateIn.isIn(getTagFromJson(jsonIn));
             } else {
-                return getBlockStateFromJson(jsonIn) != null ? stateIn.equals(getBlockStateFromJson(jsonIn)) : false;
+
+                Pair<BlockState, Optional<CompoundNBT>> jsonPair = getBlockStateFromJson(jsonIn);
+                //dirty hack
+                List<Boolean> checks = new ArrayList<>();
+                BlockState stateRequired = jsonPair.getKey();
+                Optional<CompoundNBT> optionalRequiredNBT = jsonPair.getValue();
+                CompoundNBT requiredNBT = null;
+
+                if (optionalRequiredNBT.isPresent()) {
+                    requiredNBT = optionalRequiredNBT.get();
+                }
+
+                String blockNameJsonIn = jsonIn.getName();
+
+                if (blockNameJsonIn.indexOf('[') == -1 || blockNameJsonIn.indexOf(']') == -1) {
+                    return stateRequired.getBlock().getRegistryName().toString().equals(stateIn.getBlock().getRegistryName().toString());
+                }
+
+                if (stateRequired.getProperties().isEmpty()) {
+                    return stateRequired.getBlock().getRegistryName().toString().equals(stateIn.getBlock().getRegistryName().toString());
+                }
+
+                for (Property<?> properties : stateRequired.getProperties()) {
+                    checks.add(stateIn.hasProperty(properties) && stateIn.get(properties) == stateRequired.get(properties));
+                }
+
+                if (matchNBT) {
+                    if (nbtOptional.isPresent() && requiredNBT != null) {
+                        CompoundNBT compoundNBT = nbtOptional.get();
+                        for (String nbtNames : requiredNBT.keySet()) {
+                            checks.add(compoundNBT.contains(nbtNames) && NBTUtil.areNBTEquals(compoundNBT.get(nbtNames), requiredNBT.get(nbtNames), true));
+                        }
+                    }
+                    return !checks.contains(false);
+                } else {
+                    return !checks.contains(false);
+                }
             }
         }
 
-        public static BlockState getBlockStateFromJson(SimpleBlockProvider jsonIn) {
+        public static Pair<BlockState, Optional<CompoundNBT>> getBlockStateFromJson(SimpleBlockProvider jsonIn) {
             String name = jsonIn.getName();
             String nbt = jsonIn.getNbt();
 
             if (!jsonIn.isTag()) {
-                if (MiscHelper.isStringValid(name)) {
-                    try {
-                        if (jsonIn.hasTE()) {
-                            BlockStateParser parser = new BlockStateParser(new StringReader(jsonIn.getName()), true).parse(true);
-                            BlockState state = parser.getState();
-                            if (MiscHelper.isStateValid(state)) {
-                                return state;
-                            } else {
-                                logger.warn("BlockState serialization failed, block with name {} is not valid", name);
-                            }
-                        } else {
-                            BlockStateParser parser = new BlockStateParser(new StringReader(jsonIn.getName()), false);
-                            BlockState state = parser.getState();
-                            if (MiscHelper.isStateValid(state)) {
-                                return state;
-                            } else {
-                                logger.warn("BlockState serialization failed, block with name {} is not valid", name);
-                            }
-                        }
-                    } catch (Exception e) {
-                        logger.warn("Tried to read NBT from TE but TE or NBT does not exist");
-                    }
-                    return null;
-                } else {
-                    logger.warn("ItemStack serialization failed, input name is null");
-                }
+                return getBlockStateFromJson(name, nbt, jsonIn.hasTE());
             }
             return null;
         }
 
-        public static BlockState getBlockStateFromJson(String nameIn, String nbtIn) {
-            String name = nameIn;
-            String nbt = nbtIn;
-
-            if (MiscHelper.isStringValid(name)) {
+        public static Pair<BlockState, Optional<CompoundNBT>> getBlockStateFromJson(String nameIn, String nbtIn, boolean hasTe) {
+            if (MiscHelper.isStringValid(nameIn)) {
                 try {
-                    if (MiscHelper.isStringValid(nbt)) {
-                        BlockStateParser parser = new BlockStateParser(new StringReader(name), true).parse(true);
+                    if (hasTe) {
+                        BlockStateParser parser = new BlockStateParser(new StringReader(nameIn + nbtIn), true).parse(true);
                         BlockState state = parser.getState();
                         if (MiscHelper.isStateValid(state)) {
-                            return state;
+                            return new Pair<BlockState, Optional<CompoundNBT>>(state, Optional.of(parser.getNbt()));
                         } else {
-                            logger.warn("BlockState serialization failed, block with name {} is not valid", name);
+                            logger.warn("BlockState serialization failed, block with name {} is not valid", nameIn);
                         }
                     } else {
-                        BlockStateParser parser = new BlockStateParser(new StringReader(name), false).parse(false);
+                        BlockStateParser parser = new BlockStateParser(new StringReader(nameIn), false).parse(false);
                         BlockState state = parser.getState();
                         if (MiscHelper.isStateValid(state)) {
-                            return state;
+                            return new Pair<BlockState, Optional<CompoundNBT>>(state, Optional.ofNullable(parser.getNbt()));
                         } else {
-                            logger.warn("BlockState serialization failed, block with name {} is not valid", name);
+                            logger.warn("BlockState serialization failed, block with name {} is not valid", nameIn);
                         }
                     }
                 } catch (Exception e) {
@@ -352,7 +401,7 @@ public class JsonSerializer {
                 }
                 return null;
             } else {
-                logger.warn("ItemStack serialization failed, input name is null");
+                logger.warn("Blockstate serialization failed, input name is null");
             }
             return null;
         }
@@ -394,7 +443,7 @@ public class JsonSerializer {
         public static List<ITag> getTagFromFluid(Fluid fluid) {
             List<ITag> tags = new ArrayList<>();
             for (ResourceLocation rl : TagCollectionManager.getManager().getFluidTags().getOwningTags(fluid)) {
-                ITag tag = getItemTagFromRL(rl);
+                ITag tag = getTagFromRL(rl, FLUID);
                 if (tag != null) {
                     tags.add(tag);
                 }
@@ -425,7 +474,7 @@ public class JsonSerializer {
                 }
                 return stackIn.getFluid().isIn(getTagFromJson(jsonIn));
             } else {
-                return stackIn.isFluidStackIdentical(getFluidStackFromJson(jsonIn));
+                return MiscHelper.areFluidsSame(stackIn, getFluidStackFromJson(jsonIn));
             }
         }
 
@@ -496,7 +545,7 @@ public class JsonSerializer {
         public static List<ITag> getTagFromEntity(EntityType<?> type) {
             List<ITag> tags = new ArrayList<>();
             for (ResourceLocation rl : TagCollectionManager.getManager().getEntityTypeTags().getOwningTags(type)) {
-                ITag tag = getItemTagFromRL(rl);
+                ITag tag = getTagFromRL(rl, ENTITY);
                 if (tag != null) {
                     tags.add(tag);
                 }
@@ -510,7 +559,7 @@ public class JsonSerializer {
             return list;
         }
 
-        public static boolean doesEntitiesMatch(Entity entity, SimpleEntityProvider jsonIn, World world) {
+        public static boolean doesEntitiesMatch(Entity entity, SimpleEntityProvider jsonIn) {
             if (isModWildCard(jsonIn)) {
                 String entityModID = entity.getType().getRegistryName().getNamespace();
                 String requiredModID = getModIDFromString(jsonIn);
@@ -522,23 +571,8 @@ public class JsonSerializer {
                 }
                 return entity.getType().getTags().contains(getTagFromJson(jsonIn));
             } else {
-                return entity.isEntityEqual(getEntityFromJson(jsonIn, world));
+                return entity.getType().getRegistryName().toString().equals(jsonIn.getName());
             }
-        }
-
-        public static Entity getEntityFromJson(SimpleEntityProvider jsonIn, World world) {
-            String name = jsonIn.getName();
-
-            if (!jsonIn.isTag()) {
-                if (MiscHelper.isStringValid(name)) {
-                    ResourceLocation rl = new ResourceLocation(name);
-                    EntityType<?> type = ForgeRegistries.ENTITIES.getValue(rl);
-                    if (type != null) {
-                        return type.create(world);
-                    }
-                }
-            }
-            return null;
         }
 
         public static EntityType<?> getEntityTypeFromJson(SimpleEntityProvider jsonIn) {
@@ -571,7 +605,7 @@ public class JsonSerializer {
         }
     }
 
-    public static boolean isModWildCard(SimpleObjProvider jsonIn) {
+    public static boolean isModWildCard(ISimpleObjProvider jsonIn) {
         return isModWildCard(jsonIn.getName());
     }
 
@@ -579,7 +613,7 @@ public class JsonSerializer {
         return stringIn.charAt(0) == '*';
     }
 
-    public static String getModIDFromString(SimpleObjProvider jsonIn) {
+    public static String getModIDFromString(ISimpleObjProvider jsonIn) {
         return getModIDFromString(jsonIn.getName());
     }
 

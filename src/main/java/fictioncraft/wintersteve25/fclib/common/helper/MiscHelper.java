@@ -6,6 +6,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.material.Material;
 import net.minecraft.fluid.Fluid;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -13,6 +14,7 @@ import net.minecraft.item.Items;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.Tags;
+import net.minecraftforge.fluids.FluidStack;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -111,5 +113,13 @@ public class MiscHelper {
                 .filter(entry -> value.equals(entry.getValue()))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
+    }
+
+    public static boolean areFluidsSame(FluidStack stackIn, FluidStack stackOther) {
+        return areFluidNBTSame(stackIn, stackOther) && stackIn.getAmount() == stackOther.getAmount() && stackIn.getFluid().isEquivalentTo(stackOther.getFluid());
+    }
+
+    public static boolean areFluidNBTSame(FluidStack stackIn, FluidStack stackOther) {
+        return stackIn.getTag() == null ? stackOther.getTag() == null : stackOther.getTag() != null && stackIn.getTag().equals(stackOther.getTag());
     }
 }

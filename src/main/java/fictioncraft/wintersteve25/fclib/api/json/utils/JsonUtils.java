@@ -3,6 +3,7 @@ package fictioncraft.wintersteve25.fclib.api.json.utils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import fictioncraft.wintersteve25.fclib.FCLibConfig;
+import fictioncraft.wintersteve25.fclib.FCLibMod;
 import fictioncraft.wintersteve25.fclib.api.events.Hooks;
 import fictioncraft.wintersteve25.fclib.api.events.JsonConfigEvent;
 import fictioncraft.wintersteve25.fclib.api.json.base.IJsonConfig;
@@ -60,11 +61,15 @@ public class JsonUtils {
 
         for (IJsonConfig configs : JsonConfigManager.jsonConfigMap.keySet()) {
             if (configs != null) {
-                if (Hooks.onJsonLoad(configs, printExample, JsonConfigEvent.JsonConfigLoadStages.WRITE)) {
+                if (Hooks.onJsonLoadPre(configs, printExample, JsonConfigEvent.JsonConfigLoadStages.WRITE)) {
                     configs.write();
+                    Hooks.onJsonLoadPost(configs, FCLibConfig.GENERATE_EXAMPLE.get(), JsonConfigEvent.JsonConfigLoadStages.WRITE);
+                    FCLibMod.logger.info("Created {} config", configs.UID());
                 }
-                if (Hooks.onJsonLoad(configs, printExample, JsonConfigEvent.JsonConfigLoadStages.EXAMPLE) && printExample) {
+                if (Hooks.onJsonLoadPre(configs, printExample, JsonConfigEvent.JsonConfigLoadStages.EXAMPLE) && printExample) {
                     configs.example();
+                    Hooks.onJsonLoadPost(configs, FCLibConfig.GENERATE_EXAMPLE.get(), JsonConfigEvent.JsonConfigLoadStages.EXAMPLE);
+                    FCLibMod.logger.info("Created {} config example", configs.UID());
                 }
             }
         }
@@ -73,8 +78,10 @@ public class JsonUtils {
     public static void loadJson() {
         for (IJsonConfig configs : JsonConfigManager.jsonConfigMap.keySet()) {
             if (configs != null) {
-                if (Hooks.onJsonLoad(configs, FCLibConfig.GENERATE_EXAMPLE.get(), JsonConfigEvent.JsonConfigLoadStages.READ)) {
+                if (Hooks.onJsonLoadPre(configs, FCLibConfig.GENERATE_EXAMPLE.get(), JsonConfigEvent.JsonConfigLoadStages.READ)) {
                     configs.read();
+                    Hooks.onJsonLoadPost(configs, FCLibConfig.GENERATE_EXAMPLE.get(), JsonConfigEvent.JsonConfigLoadStages.READ);
+                    FCLibMod.logger.info("Read {} config", configs.UID());
                 }
             }
         }

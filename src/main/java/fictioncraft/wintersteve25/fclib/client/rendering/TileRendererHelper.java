@@ -1,4 +1,4 @@
-package fictioncraft.wintersteve25.fclib.client.renderer;
+package fictioncraft.wintersteve25.fclib.client.rendering;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
