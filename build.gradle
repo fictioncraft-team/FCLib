@@ -12,7 +12,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '2.1.7'
+version = '2.1.8'
 group = 'fictioncraft.wintersteve25.fclib' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'fclib'
 
@@ -91,10 +91,14 @@ repositories {
 //            includeGroup "dev.latvian.mods"
 //        }
 //    }
+    maven {
+        url "https://www.cursemaven.com"
+    }
 }
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.16.5-36.2.0'
+    compile fg.deobf("curse.maven:packmode-278398:3104411")
 //    compile fg.deobf("com.blamejared.crafttweaker:CraftTweaker-1.16.5:7.1.0.203")
 //
 //    implementation fg.deobf("dev.latvian.mods:kubejs-forge:${kubejs_version}")
@@ -109,7 +113,7 @@ jar {
         attributes([
             "Specification-Title": "FCLib",
             "Specification-Vendor": "FCLibsareus",
-            "Specification-Version": "2.1.7", // We are version 1 of ourselves
+            "Specification-Version": "2.1.8", // We are version 1 of ourselves
             "Implementation-Title": project.name,
             "Implementation-Version": "${version}",
             "Implementation-Vendor" :"FCLibsareus",

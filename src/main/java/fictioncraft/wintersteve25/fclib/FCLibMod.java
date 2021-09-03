@@ -1,6 +1,7 @@
 package fictioncraft.wintersteve25.fclib;
 
 import com.mojang.brigadier.CommandDispatcher;
+import fictioncraft.wintersteve25.example.JsonExample;
 import fictioncraft.wintersteve25.fclib.api.json.ErrorUtils;
 import fictioncraft.wintersteve25.fclib.api.json.commands.*;
 import fictioncraft.wintersteve25.fclib.api.json.objects.ProviderType;
@@ -11,6 +12,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -48,9 +50,9 @@ public class FCLibMod {
         logger.info("Loading Jsons...");
         JsonUtils.loadJson();
 
-//        JsonExample jsonExample = new JsonExample();
-//        jsonExample.write();
-//        jsonExample.read();
+        JsonExample jsonExample = new JsonExample();
+        jsonExample.write();
+        jsonExample.read();
     }
 
     public static void playerLogIn(PlayerEvent.PlayerLoggedInEvent event) {

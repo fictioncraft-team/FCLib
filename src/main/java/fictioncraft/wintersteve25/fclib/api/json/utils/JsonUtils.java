@@ -7,6 +7,8 @@ import fictioncraft.wintersteve25.fclib.FCLibMod;
 import fictioncraft.wintersteve25.fclib.api.events.Hooks;
 import fictioncraft.wintersteve25.fclib.api.events.JsonConfigEvent;
 import fictioncraft.wintersteve25.fclib.api.json.base.IJsonConfig;
+import fictioncraft.wintersteve25.fclib.api.json.compat.PackModeCompat;
+import fictioncraft.wintersteve25.fclib.common.helper.ModListHelper;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 
@@ -38,10 +40,24 @@ public class JsonUtils {
     }
 
     public static File getConfigFile(String modid, boolean example) {
-        return example ? new File(directory.getPath() + File.separator + modid + "_example.json") : new File(directory.getPath() + File.separator + modid + ".json");
+        if (ModListHelper.isPackModeLoaded()) {
+            return PackModeCompat.getPackModeConfigFile(modid, example);
+        }
+        return getConfigFile(modid, example, "Normal");
+    }
+
+    public static File getConfigFile(String modid, boolean example, String packmode) {
+        String mode = packmode;
+        createPackModeDirectory(packmode);
+        return example ? new File(directory.getPath() + File.separator + packmode + File.separator + modid + "_example.json") : new File(directory.getPath() + File.separator + packmode + File.separator + modid + ".json");
     }
 
     public static void writeTemplateInConfig(PrintWriter writer, Object template, Logger logger) {
+        logger.info("Attemping to write object into file");
+        if (writer == null) {
+            logger.warn("writer is null. This shouldn't be happening.");
+            return;
+        }
         writer.print(gson.toJson(template));
         writer.close();
     }
@@ -49,6 +65,13 @@ public class JsonUtils {
     public static void createDirectory() {
         if (!directory.exists()) {
             directory.mkdir();
+        }
+    }
+
+    public static void createPackModeDirectory(String packmode) {
+        File packModeDirectory = new File(directory.getPath() + File.separator + packmode + File.separator);
+        if (!packModeDirectory.exists()) {
+            packModeDirectory.mkdir();
         }
     }
 

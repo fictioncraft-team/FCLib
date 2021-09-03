@@ -1,6 +1,8 @@
 package fictioncraft.wintersteve25.fclib.api.events;
 
 import fictioncraft.wintersteve25.fclib.api.json.base.IJsonConfig;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 
 public class Hooks {

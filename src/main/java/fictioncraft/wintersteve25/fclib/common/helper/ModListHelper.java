@@ -11,4 +11,8 @@ public class ModListHelper {
     public static boolean isFCLibLoaded() {
         return isModLoaded("fclib");
     }
+
+    public static boolean isPackModeLoaded() {
+        return isModLoaded("packmode");
+    }
 }
