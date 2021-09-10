@@ -3,8 +3,9 @@ package fictioncraft.wintersteve25.fclib.common.helper;
 import net.minecraftforge.fml.ModList;
 
 public class ModListHelper {
+    private static final ModList modList = ModList.get();
+
     public static boolean isModLoaded(String modId) {
-        ModList modList = ModList.get();
         return modList.isLoaded(modId);
     }
 

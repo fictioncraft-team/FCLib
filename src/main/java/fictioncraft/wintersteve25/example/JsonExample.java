@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder;
 import fictioncraft.wintersteve25.fclib.api.json.base.IJsonConfig;
 import fictioncraft.wintersteve25.fclib.api.json.objects.SimpleConfigObject;
 import fictioncraft.wintersteve25.fclib.api.json.objects.SimpleObjectMap;
-import fictioncraft.wintersteve25.fclib.api.json.objects.providers.templates.SimpleItemProvider;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.templates.SimpleItemProvider;
 import fictioncraft.wintersteve25.fclib.api.json.utils.JsonUtils;
 import net.minecraft.util.ResourceLocation;
 import org.apache.logging.log4j.LogManager;

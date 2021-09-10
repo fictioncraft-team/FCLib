@@ -1,12 +1,11 @@
 package fictioncraft.wintersteve25.example;
 
 import fictioncraft.wintersteve25.fclib.api.json.objects.SimpleConfigObject;
-import fictioncraft.wintersteve25.fclib.api.json.objects.providers.SimpleObjProvider;
-import fictioncraft.wintersteve25.fclib.api.json.objects.providers.templates.SimpleBlockProvider;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.SimpleObjProvider;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.templates.SimpleBlockProvider;
 import fictioncraft.wintersteve25.fclib.api.json.utils.JsonSerializer;
 import fictioncraft.wintersteve25.fclib.common.helper.MiscHelper;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;

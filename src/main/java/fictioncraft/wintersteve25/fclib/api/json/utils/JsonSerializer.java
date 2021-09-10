@@ -1,50 +1,58 @@
 package fictioncraft.wintersteve25.fclib.api.json.utils;
 
 import com.mojang.brigadier.StringReader;
-import fictioncraft.wintersteve25.fclib.api.json.objects.ProviderType;
-import fictioncraft.wintersteve25.fclib.api.json.objects.providers.ISimpleObjProvider;
-import fictioncraft.wintersteve25.fclib.api.json.objects.providers.templates.SimpleBlockProvider;
-import fictioncraft.wintersteve25.fclib.api.json.objects.providers.templates.SimpleEntityProvider;
-import fictioncraft.wintersteve25.fclib.api.json.objects.providers.templates.SimpleFluidProvider;
-import fictioncraft.wintersteve25.fclib.api.json.objects.providers.templates.SimpleItemProvider;
+import fictioncraft.wintersteve25.fclib.FCLibMod;
+import fictioncraft.wintersteve25.fclib.api.events.Hooks;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.arg.SimpleArgProvider;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.arg.template.SimpleCommandArg;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.arg.template.SimpleEffectArg;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.arg.template.SimpleSwingHandArg;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.arg.template.SimpleTransformArg;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.ObjProviderType;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.ISimpleObjProvider;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.templates.SimpleBlockProvider;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.templates.SimpleEntityProvider;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.templates.SimpleFluidProvider;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.templates.SimpleItemProvider;
+import fictioncraft.wintersteve25.fclib.common.helper.CommandsHelper;
 import fictioncraft.wintersteve25.fclib.common.helper.MiscHelper;
 import fictioncraft.wintersteve25.fclib.common.helper.ModListHelper;
 import javafx.util.Pair;
-import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.pattern.BlockStateMatcher;
 import net.minecraft.command.arguments.BlockStateParser;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
+import net.minecraft.entity.*;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.Fluids;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTUtil;
+import net.minecraft.potion.Effect;
+import net.minecraft.potion.EffectInstance;
 import net.minecraft.state.Property;
 import net.minecraft.tags.ITag;
 import net.minecraft.tags.TagCollectionManager;
-import net.minecraft.tileentity.ChestTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.swing.text.html.Option;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-import static fictioncraft.wintersteve25.fclib.api.json.objects.ProviderType.*;
+import static fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.ObjProviderType.*;
 
 @SuppressWarnings("all")
 public class JsonSerializer {
@@ -57,7 +65,7 @@ public class JsonSerializer {
         return null;
     }
 
-    public static ITag getTagFromJson(String name, ProviderType type) {
+    public static ITag getTagFromJson(String name, ObjProviderType type) {
         if (MiscHelper.isStringValid(name)) {
             if (BLOCK.equals(type)) {
                 return TagCollectionManager.getManager().getBlockTags().getTagByID(new ResourceLocation(name));
@@ -75,7 +83,7 @@ public class JsonSerializer {
         return null;
     }
 
-    public static ITag getTagFromRL(ResourceLocation resourceLocation, ProviderType type) {
+    public static ITag getTagFromRL(ResourceLocation resourceLocation, ObjProviderType type) {
         return getTagFromJson(resourceLocation.toString(), type);
     }
 
@@ -575,14 +583,19 @@ public class JsonSerializer {
             }
         }
 
-        public static EntityType<?> getEntityTypeFromJson(SimpleEntityProvider jsonIn) {
+        public static<T extends Entity> EntityType<T> getEntityTypeFromJson(SimpleEntityProvider jsonIn) {
             String name = jsonIn.getName();
 
             if (!jsonIn.isTag()) {
                 if (MiscHelper.isStringValid(name)) {
                     ResourceLocation rl = new ResourceLocation(name);
-                    EntityType<?> type = ForgeRegistries.ENTITIES.getValue(rl);
-                    return type;
+                    try {
+                        EntityType<T> type = (EntityType<T>) ForgeRegistries.ENTITIES.getValue(rl);
+                        return type;
+                    } catch (Exception e) {
+                        FCLibMod.logger.warn("Caught an casting exception from serialized entity type to entity childrens");
+                        e.printStackTrace();
+                    }
                 }
             }
             return null;
@@ -602,6 +615,115 @@ public class JsonSerializer {
             String name = type.getRegistryName().toString();
 
             return new SimpleEntityProvider(name, false);
+        }
+    }
+
+    public static class EffectSerializer {
+        public static Effect getEffectFromJson(SimpleEffectArg jsonIn) {
+            String name = jsonIn.getEffectName();
+            return ForgeRegistries.POTIONS.getValue(new ResourceLocation(name));
+        }
+
+        public static EffectInstance getEffectInstanceFromJson(SimpleEffectArg jsonIn) {
+            Effect effect = getEffectFromJson(jsonIn);
+            if (effect == null) return null;
+            return new EffectInstance(effect, jsonIn.getEffectDuration(), jsonIn.getEffectLevel());
+        }
+
+        public static boolean effectPredicate(LivingEntity entity, SimpleEffectArg arg) {
+            EffectInstance effect = getEffectInstanceFromJson(arg);
+            Collection<EffectInstance> effects = entity.getActivePotionEffects();
+            return effects.isEmpty() ? false : effects.contains(effect);
+        }
+    }
+
+    public static class Args {
+        public static void execute(PlayerEntity player, @Nullable Entity entity, SimpleArgProvider arg) {
+            if (arg == null || player == null) return;
+            if (arg instanceof SimpleCommandArg) {
+                SimpleCommandArg commandArg = (SimpleCommandArg) arg;
+                executeCommand(player, commandArg);
+                return;
+            } else if (arg instanceof SimpleEffectArg) {
+                SimpleEffectArg effectArg = (SimpleEffectArg) arg;
+                if (effectArg.isCondition()) return;
+                executeEffect(player, effectArg);
+                return;
+            } else if (arg instanceof SimpleTransformArg) {
+                SimpleTransformArg transformArg = (SimpleTransformArg) arg;
+                executeTransform(entity, transformArg);
+                return;
+            } else if (arg instanceof SimpleSwingHandArg) {
+                SimpleSwingHandArg swingHandArg = (SimpleSwingHandArg) arg;
+
+            }
+            arg.getType().getArgExecutor().accept(player, arg);
+        }
+
+        public static void executeCommand(PlayerEntity playerEntity, SimpleCommandArg arg) {
+            World world = playerEntity.getEntityWorld();
+            String command = arg.getCommand();
+            if (!world.isRemote()) {
+                CommandsHelper.executeCommand(playerEntity, command, arg.isRunAsPlayer());
+            }
+        }
+
+        public static void executeEffect(LivingEntity entity, SimpleEffectArg arg) {
+            if (entity.getEntityWorld().isRemote()) return;
+            EffectInstance effect = EffectSerializer.getEffectInstanceFromJson(arg);
+            if (effect == null) return;
+            entity.addPotionEffect(effect);
+        }
+
+        public static <T extends Entity> void executeTransform(Entity entityOld, SimpleTransformArg arg) {
+            World world = entityOld.getEntityWorld();
+            if (world.isRemote()) return;
+            ServerWorld serverWorld = (ServerWorld) world;
+            SimpleEntityProvider entityProvider = arg.getProvider();
+            if (entityOld == null || entityProvider == null) return;
+            EntityType<T> entityType = EntitySerialization.getEntityTypeFromJson(entityProvider);
+
+            if (entityType == null) return;
+
+            if (!arg.isAllowPeaceful()) {
+                if (world.getDifficulty() != Difficulty.PEACEFUL && Hooks.onEntityTransformPre(entityOld, entityType)) {
+                    T entityToCreate = entityType.create(serverWorld, entityOld.serializeNBT(), null, null, new BlockPos(entityOld.getPosX(), entityOld.getPosY(), entityOld.getPosZ()), SpawnReason.CONVERSION, false, false);
+                    entityToCreate.setLocationAndAngles(entityOld.getPosX(), entityOld.getPosY(), entityOld.getPosZ(), entityOld.rotationYaw, entityOld.rotationPitch);
+                    Hooks.onEntityTransformPost(entityOld, entityType);
+                    entityOld.remove();
+                }
+            }
+
+            if (Hooks.onEntityTransformPre(entityOld, entityType)) {
+                T entityToCreate = entityType.create(serverWorld, entityOld.serializeNBT(), null, null, new BlockPos(entityOld.getPosX(), entityOld.getPosY(), entityOld.getPosZ()), SpawnReason.CONVERSION, false, false);
+                entityToCreate.setLocationAndAngles(entityOld.getPosX(), entityOld.getPosY(), entityOld.getPosZ(), entityOld.rotationYaw, entityOld.rotationPitch);
+                Hooks.onEntityTransformPost(entityOld, entityType);
+                entityOld.remove();
+            }
+        }
+
+        public static void executeKill(Entity entityOld) {
+            World world = entityOld.getEntityWorld();
+            if (world.isRemote()) return;
+            if (entityOld == null) return;
+            entityOld.onKillCommand();
+        }
+
+        public static void executeSwingHand(LivingEntity entity, SimpleSwingHandArg arg) {
+            SimpleSwingHandArg.JsonHandTypes handType = arg.handType();
+            if (!entity.getEntityWorld().isRemote()) {
+                switch (handType) {
+                    case MAIN:
+                        entity.swingArm(Hand.MAIN_HAND);
+                        break;
+                    case OFF:
+                        entity.swingArm(Hand.OFF_HAND);
+                        break;
+                    case DEFAULT:
+                        entity.swingArm(entity.getActiveHand());
+                        break;
+                }
+            }
         }
     }
 

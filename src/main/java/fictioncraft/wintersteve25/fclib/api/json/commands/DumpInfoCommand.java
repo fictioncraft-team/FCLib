@@ -8,11 +8,11 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import fictioncraft.wintersteve25.fclib.FCLibMod;
-import fictioncraft.wintersteve25.fclib.api.json.objects.ProviderType;
-import fictioncraft.wintersteve25.fclib.api.json.objects.providers.templates.SimpleBlockProvider;
-import fictioncraft.wintersteve25.fclib.api.json.objects.providers.templates.SimpleEntityProvider;
-import fictioncraft.wintersteve25.fclib.api.json.objects.providers.templates.SimpleFluidProvider;
-import fictioncraft.wintersteve25.fclib.api.json.objects.providers.templates.SimpleItemProvider;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.ObjProviderType;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.templates.SimpleBlockProvider;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.templates.SimpleEntityProvider;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.templates.SimpleFluidProvider;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.templates.SimpleItemProvider;
 import fictioncraft.wintersteve25.fclib.api.json.utils.JsonSerializer;
 import fictioncraft.wintersteve25.fclib.api.json.utils.JsonUtils;
 import fictioncraft.wintersteve25.fclib.common.helper.CommandsHelper;
@@ -31,14 +31,14 @@ import net.minecraftforge.fluids.FluidUtil;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static fictioncraft.wintersteve25.fclib.api.json.objects.ProviderType.*;
+import static fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.ObjProviderType.*;
 
 public class DumpInfoCommand implements Command<CommandSource> {
 
     private static final DumpInfoCommand INSTANCE = new DumpInfoCommand();
 
     public static ArgumentBuilder<CommandSource, ?> register(CommandDispatcher<CommandSource> dispatcher) {
-        List<String> providerTypes = FCLibMod.PROVIDER_TYPES.stream().map(ProviderType::getID).collect(Collectors.toList());
+        List<String> providerTypes = FCLibMod.OBJ_PROVIDER_TYPES.stream().map(ObjProviderType::getID).collect(Collectors.toList());
 
         providerTypes.remove(OTHERS.getID());
 
@@ -52,7 +52,7 @@ public class DumpInfoCommand implements Command<CommandSource> {
     @Override
     public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
 
-        ProviderType providerType = ProviderType.getFromName(StringArgumentType.getString(context, "type"));
+        ObjProviderType providerType = ObjProviderType.getFromName(StringArgumentType.getString(context, "type"));
         ServerPlayerEntity player = context.getSource().asPlayer();
         ItemStack stack = player.getHeldItemMainhand();
         boolean outputTag = StringArgumentType.getString(context, "outputTagInstead").equals("true");

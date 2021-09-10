@@ -1,6 +1,6 @@
-package fictioncraft.wintersteve25.fclib.api.json.objects.providers.templates;
+package fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.templates;
 
-import fictioncraft.wintersteve25.fclib.api.json.objects.providers.SimpleObjProvider;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.SimpleObjProvider;
 
 public class SimpleBlockProvider extends SimpleObjProvider {
 

@@ -1,7 +1,6 @@
-package fictioncraft.wintersteve25.fclib.api.json.objects.providers;
+package fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj;
 
 import com.google.gson.annotations.JsonAdapter;
-import fictioncraft.wintersteve25.fclib.api.json.objects.ProviderType;
 
 @JsonAdapter(SimpleObjProviderJsonAdapter.class)
 public class SimpleObjProvider implements ISimpleObjProvider {
@@ -26,7 +25,7 @@ public class SimpleObjProvider implements ISimpleObjProvider {
     }
 
     @Override
-    public ProviderType getType() {
-        return ProviderType.getFromName(this.type);
+    public ObjProviderType getType() {
+        return ObjProviderType.getFromName(this.type);
     }
 }

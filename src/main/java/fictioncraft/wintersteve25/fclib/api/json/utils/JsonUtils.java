@@ -29,6 +29,10 @@ public class JsonUtils {
         return null;
     }
 
+    public static Gson getGson() {
+        return gson;
+    }
+
     public static void errorOnCreation(Exception e, Logger logger) {
         logger.log(Level.ERROR, "Exception when trying to create config");
         e.printStackTrace();

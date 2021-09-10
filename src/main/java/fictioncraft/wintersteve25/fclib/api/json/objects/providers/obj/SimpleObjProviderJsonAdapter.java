@@ -1,8 +1,7 @@
-package fictioncraft.wintersteve25.fclib.api.json.objects.providers;
+package fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj;
 
 import fictioncraft.wintersteve25.fclib.FCLibMod;
 import fictioncraft.wintersteve25.fclib.api.json.RuntimeTypeAdapterFactory;
-import fictioncraft.wintersteve25.fclib.api.json.objects.ProviderType;
 
 public class SimpleObjProviderJsonAdapter extends RuntimeTypeAdapterFactory<SimpleObjProvider> {
 
@@ -11,7 +10,7 @@ public class SimpleObjProviderJsonAdapter extends RuntimeTypeAdapterFactory<Simp
 
         boolean isDefaultRegistered = false;
 
-        for (ProviderType types : FCLibMod.PROVIDER_TYPES) {
+        for (ObjProviderType types : FCLibMod.OBJ_PROVIDER_TYPES) {
             Class<? extends SimpleObjProvider> providerClass = types.getProviderClass();
             if (providerClass != SimpleObjProvider.class) {
                 this.registerSubtype(providerClass, types.getID());

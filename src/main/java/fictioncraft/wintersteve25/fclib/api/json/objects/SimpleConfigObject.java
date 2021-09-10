@@ -1,6 +1,6 @@
 package fictioncraft.wintersteve25.fclib.api.json.objects;
 
-import fictioncraft.wintersteve25.fclib.api.json.objects.providers.SimpleObjProvider;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.SimpleObjProvider;
 
 public class SimpleConfigObject {
     private final SimpleObjProvider target;
