@@ -8,9 +8,13 @@ import fictioncraft.wintersteve25.fclib.api.json.objects.providers.arg.template.
 import fictioncraft.wintersteve25.fclib.api.json.objects.providers.arg.template.effects.*;
 import fictioncraft.wintersteve25.fclib.common.helper.MiscHelper;
 import fictioncraft.wintersteve25.fclib.common.helper.ModListHelper;
+import fictioncraft.wintersteve25.fclib.common.helper.TriFunction;
 import net.minecraft.client.audio.SimpleSound;
+import net.minecraft.data.BlockStateVariantBuilder;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 
+import javax.annotation.Nullable;
 import java.util.function.BiFunction;
 
 public class ArgProviderType {
@@ -35,9 +39,9 @@ public class ArgProviderType {
     private final String id;
     private final String requiredMod;
     private final Class<? extends SimpleArgProvider> argProviderClass;
-    private final BiFunction<PlayerEntity, SimpleArgProvider, Boolean> argExecutor;
+    private final TriFunction<PlayerEntity, Entity, SimpleArgProvider, Boolean> argExecutor;
 
-    public ArgProviderType(String id, String requiredMod, Class<? extends SimpleArgProvider> argProviderClass, BiFunction<PlayerEntity, SimpleArgProvider, Boolean> argExecutor) {
+    public ArgProviderType(String id, String requiredMod, Class<? extends SimpleArgProvider> argProviderClass, TriFunction<PlayerEntity, Entity, SimpleArgProvider, Boolean> argExecutor) {
         this.id = id;
         this.requiredMod = requiredMod;
         this.argProviderClass = argProviderClass;
@@ -58,7 +62,7 @@ public class ArgProviderType {
         return argProviderClass;
     }
 
-    public BiFunction<PlayerEntity, SimpleArgProvider, Boolean> getArgExecutor() {
+    public TriFunction<PlayerEntity, Entity, SimpleArgProvider, Boolean> getArgExecutor() {
         return argExecutor;
     }
 
@@ -79,7 +83,7 @@ public class ArgProviderType {
         return ModListHelper.isModLoaded(type.getRequiredMod());
     }
 
-    public static ArgProviderType registerProvider(String id, String requiredMod, Class<? extends SimpleArgProvider> argProviderClass, BiFunction<PlayerEntity, SimpleArgProvider, Boolean> argExecutor) {
+    public static ArgProviderType registerProvider(String id, String requiredMod, Class<? extends SimpleArgProvider> argProviderClass, TriFunction<PlayerEntity, Entity, SimpleArgProvider, Boolean> argExecutor) {
         return new ArgProviderType(id, requiredMod, argProviderClass, argExecutor);
     }
 

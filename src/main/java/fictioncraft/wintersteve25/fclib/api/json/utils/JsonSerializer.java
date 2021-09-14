@@ -22,6 +22,7 @@ import fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.templates
 import fictioncraft.wintersteve25.fclib.common.helper.CommandsHelper;
 import fictioncraft.wintersteve25.fclib.common.helper.MiscHelper;
 import fictioncraft.wintersteve25.fclib.common.helper.ModListHelper;
+import fictioncraft.wintersteve25.fclib.common.helper.TriFunction;
 import javafx.util.Pair;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -728,11 +729,13 @@ public class JsonSerializer {
                 executeSound(entity, soundArg);
                 return;
             }
-            if (type.getArgExecutor() == null) {
+            TriFunction<PlayerEntity, Entity, SimpleArgProvider, Boolean> executor = type.getArgExecutor();
+
+            if (executor == null) {
                 ErrorUtils.sendError(new TranslationTextComponent("fclib.reload.conditionNotValid", type.getID(), json.UID()), player);
                 return;
             }
-            type.getArgExecutor().apply(player, arg);
+            executor.apply(player, entity, arg);
         }
 
         public static boolean executeConditions(PlayerEntity player, @Nullable Entity entity, List<SimpleArgProvider> argList, IJsonConfig json) {
@@ -766,9 +769,9 @@ public class JsonSerializer {
                             }
                         }
                     } else {
-                        BiFunction<PlayerEntity, SimpleArgProvider, Boolean> executor = type.getArgExecutor();
+                        TriFunction<PlayerEntity, Entity, SimpleArgProvider, Boolean> executor = type.getArgExecutor();
                         if (executor == null) return false;
-                        checks.add(executor.apply(player, args));
+                        checks.add(executor.apply(player, entity, args));
                     }
                 }
             }
