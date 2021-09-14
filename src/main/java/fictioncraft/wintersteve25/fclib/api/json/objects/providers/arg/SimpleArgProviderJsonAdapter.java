@@ -15,8 +15,10 @@ public class SimpleArgProviderJsonAdapter extends RuntimeTypeAdapterFactory<Simp
                 Class<? extends SimpleArgProvider> providerClass = types.getArgProviderClass();
                 if (providerClass != SimpleArgProvider.class) {
                     this.registerSubtype(providerClass, types.getID());
+                    FCLibMod.logger.info("registered argument type: {}", types.getID());
                 } else if (!isDefaultRegistered) {
                     this.registerSubtype(providerClass, "Default");
+                    FCLibMod.logger.info("registered default argument type");
                     isDefaultRegistered = true;
                 }
             }
