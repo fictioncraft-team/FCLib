@@ -6,5 +6,8 @@
   "fclib.reload.failed.noValidConfigs": "§cFCLib Error: No valid config found in %s §cConfig",
   "fclib.reload.success": "§aIf you don't see any errors above, that means all FCLib Json configs reloaded successfully",
   "fclib.reload.useForgeDimension": "Use /forge dimensions if you want a list of dimensions. Use \"Default\" as object type",
-  "fclib.reload.notSupported": "Command not implemented"
+  "fclib.reload.notSupported": "Command not implemented",
+  "fclib.reload.argumentNotValid": "§cFCLib Error: Given %s §cargument in %s §cConfig is not valid or does not have a valid executor. If you are sure the argument is valid, report this to the mod that adds the argument",
+  "fclib.reload.conditionNotValid": "§cFCLib Error: Given %s §ccondition in %s §cConfig is not valid or does not have a valid executor. If you are sure the condition is valid, report this to the mod that adds the condition",
+  "fclib.hoverText.clickToCopy": "Click To Copy"
 }

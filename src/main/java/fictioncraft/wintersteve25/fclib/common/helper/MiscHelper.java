@@ -6,10 +6,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.material.Material;
 import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ResourceLocation;
@@ -44,7 +42,7 @@ public class MiscHelper {
         return in != null && in != Fluids.EMPTY;
     }
 
-    public static boolean isListValid(List<?> in) {
+    public static boolean isListValid(Collection<?> in) {
         return in != null && !in.isEmpty();
     }
 

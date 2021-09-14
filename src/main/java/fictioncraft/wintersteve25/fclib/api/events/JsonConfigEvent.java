@@ -1,6 +1,7 @@
 package fictioncraft.wintersteve25.fclib.api.events;
 
 import fictioncraft.wintersteve25.fclib.api.json.base.IJsonConfig;
+import fictioncraft.wintersteve25.fclib.api.json.utils.JsonConfigManager;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 
@@ -59,6 +60,18 @@ public class JsonConfigEvent extends Event {
         @Override
         public boolean isCancelable() {
             return false;
+        }
+    }
+
+    public static class Registration extends Event {
+        private final JsonConfigManager manager;
+
+        public Registration(JsonConfigManager manager) {
+            this.manager = manager;
+        }
+
+        public JsonConfigManager getManager() {
+            return manager;
         }
     }
 }

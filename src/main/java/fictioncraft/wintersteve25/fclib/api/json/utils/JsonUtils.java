@@ -2,6 +2,7 @@ package fictioncraft.wintersteve25.fclib.api.json.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.teamacronymcoders.packmode.PackModeAPIImpl;
 import fictioncraft.wintersteve25.fclib.FCLibConfig;
 import fictioncraft.wintersteve25.fclib.FCLibMod;
 import fictioncraft.wintersteve25.fclib.api.events.Hooks;
@@ -52,7 +53,6 @@ public class JsonUtils {
 
     public static File getConfigFile(String modid, boolean example, String packmode) {
         String mode = packmode;
-        createPackModeDirectory(packmode);
         return example ? new File(directory.getPath() + File.separator + packmode + File.separator + modid + "_example.json") : new File(directory.getPath() + File.separator + packmode + File.separator + modid + ".json");
     }
 
@@ -70,10 +70,16 @@ public class JsonUtils {
         if (!directory.exists()) {
             directory.mkdir();
         }
+
+        if (ModListHelper.isPackModeLoaded()) {
+            createPackModeDirectory(PackModeCompat.getPackMode());
+        } else {
+            createPackModeDirectory("Normal");
+        }
     }
 
     public static void createPackModeDirectory(String packmode) {
-        File packModeDirectory = new File(directory.getPath() + File.separator + packmode + File.separator);
+        File packModeDirectory = new File(directory.getPath() + File.separator + packmode);
         if (!packModeDirectory.exists()) {
             packModeDirectory.mkdir();
         }
@@ -86,7 +92,7 @@ public class JsonUtils {
     public static void createJson() {
         boolean printExample = FCLibConfig.GENERATE_EXAMPLE.get();
 
-        for (IJsonConfig configs : JsonConfigManager.jsonConfigMap.keySet()) {
+        for (IJsonConfig configs : FCLibMod.configManager.jsonConfigMap.keySet()) {
             if (configs != null) {
                 if (Hooks.onJsonLoadPre(configs, printExample, JsonConfigEvent.JsonConfigLoadStages.WRITE)) {
                     configs.write();
@@ -103,7 +109,7 @@ public class JsonUtils {
     }
 
     public static void loadJson() {
-        for (IJsonConfig configs : JsonConfigManager.jsonConfigMap.keySet()) {
+        for (IJsonConfig configs : FCLibMod.configManager.jsonConfigMap.keySet()) {
             if (configs != null) {
                 if (Hooks.onJsonLoadPre(configs, FCLibConfig.GENERATE_EXAMPLE.get(), JsonConfigEvent.JsonConfigLoadStages.READ)) {
                     configs.read();
@@ -112,5 +118,11 @@ public class JsonUtils {
                 }
             }
         }
+    }
+
+    public enum JsonHandTypes {
+        MAIN,
+        OFF,
+        DEFAULT
     }
 }

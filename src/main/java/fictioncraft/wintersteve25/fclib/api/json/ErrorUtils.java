@@ -1,5 +1,6 @@
 package fictioncraft.wintersteve25.fclib.api.json;
 
+import fictioncraft.wintersteve25.fclib.FCLibMod;
 import fictioncraft.wintersteve25.fclib.api.json.objects.SimpleObjectMap;
 import fictioncraft.wintersteve25.fclib.common.helper.MiscHelper;
 import fictioncraft.wintersteve25.fclib.api.json.base.IJsonConfig;
@@ -35,7 +36,7 @@ public class ErrorUtils {
         JsonUtils.createJson();
         JsonUtils.loadJson();
 
-        for (IJsonConfig config : JsonConfigManager.jsonConfigMap.keySet()) {
+        for (IJsonConfig config : FCLibMod.configManager.jsonConfigMap.keySet()) {
             if (config != null && config.finishedConfig() != null) {
                 SimpleObjectMap cfg = config.finishedConfig();
 

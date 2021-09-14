@@ -15,12 +15,12 @@ import java.io.PrintWriter;
 /**
  * This is an default implementation of IJsonConfig. It is used by JsonConfigBuilder if you just want simple json config. You can create your custom implementation of IJsonConfig if you need to do more advanced stuff
  */
-public abstract class JsonConfig implements IJsonConfig {
+public abstract class JsonConfig<T extends SimpleObjectMap> implements IJsonConfig {
     //this is where the loaded data be stored in, do NOObject modify data in this
-    public SimpleObjectMap configData;
+    public T configData;
 
-    private SimpleObjectMap template;
-    private SimpleObjectMap example;
+    private T template;
+    private T example;
 
     Logger logger = LogManager.getLogger("FCLibJsonConfigBuilder");
     File configFile = JsonUtils.getConfigFile(UID().getNamespace(), false);
@@ -28,7 +28,6 @@ public abstract class JsonConfig implements IJsonConfig {
 
     @Override
     public void write() {
-        JsonUtils.createDirectory();
         if (!configFile.exists()) {
             PrintWriter writer = JsonUtils.createWriter(configFile, logger);
             JsonUtils.writeTemplateInConfig(writer, template, logger);
@@ -37,7 +36,6 @@ public abstract class JsonConfig implements IJsonConfig {
 
     @Override
     public void example() {
-        JsonUtils.createDirectory();
         PrintWriter writer = JsonUtils.createWriter(exampleFile, logger);
         JsonUtils.writeTemplateInConfig(writer, example, logger);
     }
@@ -51,7 +49,7 @@ public abstract class JsonConfig implements IJsonConfig {
             try {
                 logger.info("Attempting to read {}", configFile.getName());
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                SimpleObjectMap c = gson.fromJson(new FileReader(configFile), SimpleObjectMap.class);
+                T c = gson.fromJson(new FileReader(configFile), getOutputType());
                 if (c != null) {
                     if (c.getConfigs() != null && !c.getConfigs().isEmpty()) {
                         configData = c;
@@ -65,6 +63,8 @@ public abstract class JsonConfig implements IJsonConfig {
         }
     }
 
+    public abstract Class<T> getOutputType();
+
     @Override
     public SimpleObjectMap finishedConfig() {
         return configData;
@@ -74,7 +74,7 @@ public abstract class JsonConfig implements IJsonConfig {
         return template;
     }
 
-    public void setTemplate(SimpleObjectMap template) {
+    public void setTemplate(T template) {
         this.template = template;
     }
 
@@ -82,7 +82,7 @@ public abstract class JsonConfig implements IJsonConfig {
         return example;
     }
 
-    public void setExample(SimpleObjectMap example) {
+    public void setExample(T example) {
         this.example = example;
     }
 }

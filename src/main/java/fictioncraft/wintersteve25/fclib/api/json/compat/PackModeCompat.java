@@ -9,4 +9,8 @@ public class PackModeCompat {
     public static File getPackModeConfigFile(String modid, boolean example) {
         return JsonUtils.getConfigFile(modid, example, PackModeAPIImpl.getInstance().getPackMode());
     }
+
+    public static String getPackMode() {
+        return PackModeAPIImpl.getInstance().getPackMode();
+    }
 }

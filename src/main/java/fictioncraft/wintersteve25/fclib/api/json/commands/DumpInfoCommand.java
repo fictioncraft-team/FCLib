@@ -24,7 +24,12 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SpawnEggItem;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.util.text.event.ClickEvent;
+import net.minecraft.util.text.event.HoverEvent;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
 
@@ -63,7 +68,8 @@ public class DumpInfoCommand implements Command<CommandSource> {
             if (!stack.isEmpty()) {
                 SimpleItemProvider itemProvider = JsonSerializer.ItemStackSerializer.fromStackToJson(stack, outputTag, index);
                 String output = JsonUtils.jsonStringFromObject(itemProvider);
-                context.getSource().sendFeedback(new TranslationTextComponent(output), false);
+                IFormattableTextComponent iformattabletextcomponent1 = (new StringTextComponent(output)).mergeStyle(TextFormatting.GRAY).modifyStyle((modifier) -> modifier.setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, output))).modifyStyle((modifier) -> modifier.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslationTextComponent("fclib.hoverText.clickToCopy"))));
+                context.getSource().sendFeedback(iformattabletextcomponent1, false);
 
                 FCLibMod.logger.info(output);
                 return 1;
@@ -77,7 +83,8 @@ public class DumpInfoCommand implements Command<CommandSource> {
 
                     SimpleBlockProvider blockProvider = JsonSerializer.BlockSerializer.fromBlockToJson(stack, block.getDefaultState(), outputTag, index);
                     String outputBlock = JsonUtils.jsonStringFromObject(blockProvider);
-                    context.getSource().sendFeedback(new TranslationTextComponent(outputBlock), false);
+                    IFormattableTextComponent iformattabletextcomponent1 = (new StringTextComponent(outputBlock)).mergeStyle(TextFormatting.GRAY).modifyStyle((modifier) -> modifier.setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, outputBlock))).modifyStyle((modifier) -> modifier.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslationTextComponent("fclib.hoverText.clickToCopy"))));
+                    context.getSource().sendFeedback(iformattabletextcomponent1, false);
 
                     FCLibMod.logger.info(outputBlock);
                     return 1;
@@ -92,8 +99,8 @@ public class DumpInfoCommand implements Command<CommandSource> {
 
                         SimpleFluidProvider fluidProvider = JsonSerializer.FluidSerializer.fromFluidToJson(fluid, outputTag, index);
                         String outputFluid = JsonUtils.jsonStringFromObject(fluidProvider);
-                        context.getSource().sendFeedback(new TranslationTextComponent(outputFluid), false);
-
+                        IFormattableTextComponent iformattabletextcomponent1 = (new StringTextComponent(outputFluid)).mergeStyle(TextFormatting.GRAY).modifyStyle((modifier) -> modifier.setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, outputFluid))).modifyStyle((modifier) -> modifier.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslationTextComponent("fclib.hoverText.clickToCopy"))));
+                        context.getSource().sendFeedback(iformattabletextcomponent1, false);
                         FCLibMod.logger.info(outputFluid);
                         return 1;
                     }
@@ -107,8 +114,8 @@ public class DumpInfoCommand implements Command<CommandSource> {
 
                     SimpleEntityProvider entityProvider = JsonSerializer.EntitySerialization.fromEntityToJson(item.getType(null), outputTag, index);
                     String outputEntity = JsonUtils.jsonStringFromObject(entityProvider);
-                    context.getSource().sendFeedback(new TranslationTextComponent(outputEntity), false);
-
+                    IFormattableTextComponent iformattabletextcomponent1 = (new StringTextComponent(outputEntity)).mergeStyle(TextFormatting.GRAY).modifyStyle((modifier) -> modifier.setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, outputEntity))).modifyStyle((modifier) -> modifier.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslationTextComponent("fclib.hoverText.clickToCopy"))));
+                    context.getSource().sendFeedback(iformattabletextcomponent1, false);
                     FCLibMod.logger.info(outputEntity);
                     return 1;
                 }

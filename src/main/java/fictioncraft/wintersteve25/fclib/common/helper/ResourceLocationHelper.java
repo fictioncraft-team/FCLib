@@ -1,7 +1,6 @@
 package fictioncraft.wintersteve25.fclib.common.helper;
 
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import org.apache.logging.log4j.LogManager;
 

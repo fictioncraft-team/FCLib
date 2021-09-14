@@ -1,4 +1,4 @@
-package fictioncraft.wintersteve25.fclib.api.json.objects.providers.arg.template;
+package fictioncraft.wintersteve25.fclib.api.json.objects.providers.arg.template.effects;
 
 import fictioncraft.wintersteve25.fclib.api.json.objects.providers.arg.SimpleArgProvider;
 
@@ -8,7 +8,7 @@ public class SimpleCommandArg extends SimpleArgProvider {
     private final boolean runAsPlayer;
 
     public SimpleCommandArg(String command, boolean runAsPlayer) {
-        super("Commands");
+        super("E_Commands");
         this.command = command;
         this.runAsPlayer = runAsPlayer;
     }

@@ -1,13 +1,18 @@
 package fictioncraft.wintersteve25.fclib.api.json.utils;
 
 import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import fictioncraft.wintersteve25.fclib.FCLibMod;
 import fictioncraft.wintersteve25.fclib.api.events.Hooks;
+import fictioncraft.wintersteve25.fclib.api.json.ErrorUtils;
+import fictioncraft.wintersteve25.fclib.api.json.base.IJsonConfig;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.arg.ArgProviderType;
 import fictioncraft.wintersteve25.fclib.api.json.objects.providers.arg.SimpleArgProvider;
-import fictioncraft.wintersteve25.fclib.api.json.objects.providers.arg.template.SimpleCommandArg;
-import fictioncraft.wintersteve25.fclib.api.json.objects.providers.arg.template.SimpleEffectArg;
-import fictioncraft.wintersteve25.fclib.api.json.objects.providers.arg.template.SimpleSwingHandArg;
-import fictioncraft.wintersteve25.fclib.api.json.objects.providers.arg.template.SimpleTransformArg;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.arg.template.condition.SimpleEffectCondition;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.arg.template.condition.SimpleExperienceCondition;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.arg.template.condition.SimpleHungerCondition;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.arg.template.condition.SimpleItemCondition;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.arg.template.effects.*;
 import fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.ObjProviderType;
 import fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.ISimpleObjProvider;
 import fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.templates.SimpleBlockProvider;
@@ -20,6 +25,8 @@ import fictioncraft.wintersteve25.fclib.common.helper.ModListHelper;
 import javafx.util.Pair;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.audio.SimpleSound;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.command.arguments.BlockStateParser;
 import net.minecraft.entity.*;
 import net.minecraft.entity.player.PlayerEntity;
@@ -29,6 +36,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTUtil;
+import net.minecraft.particles.IParticleData;
+import net.minecraft.particles.ParticleType;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.state.Property;
@@ -37,7 +46,10 @@ import net.minecraft.tags.TagCollectionManager;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -51,6 +63,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 import static fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.ObjProviderType.*;
 
@@ -497,10 +510,12 @@ public class JsonSerializer {
                     Fluid fluid = ForgeRegistries.FLUIDS.getValue(rl);
                     if (MiscHelper.isFluidValid(fluid)) {
                         if (amount > 0) {
-                            if (!tryCreateFluidStack(fluid, amount, nbt).isEmpty()) {
-                                return tryCreateFluidStack(fluid, amount, nbt);
-                            } else {
-                                logger.warn("Can not provided nbt: {}", nbt);
+                            if (MiscHelper.isStringValid(nbt)) {
+                                if (!tryCreateFluidStack(fluid, amount, nbt).isEmpty()) {
+                                    return tryCreateFluidStack(fluid, amount, nbt);
+                                } else {
+                                    logger.warn("Can not provided nbt: {}", nbt);
+                                }
                             }
                             return new FluidStack(fluid, amount);
                         }
@@ -583,7 +598,7 @@ public class JsonSerializer {
             }
         }
 
-        public static<T extends Entity> EntityType<T> getEntityTypeFromJson(SimpleEntityProvider jsonIn) {
+        public static <T extends Entity> EntityType<T> getEntityTypeFromJson(SimpleEntityProvider jsonIn) {
             String name = jsonIn.getName();
 
             if (!jsonIn.isTag()) {
@@ -624,30 +639,55 @@ public class JsonSerializer {
             return ForgeRegistries.POTIONS.getValue(new ResourceLocation(name));
         }
 
+        public static Effect getEffectFromJson(SimpleEffectCondition jsonIn) {
+            String name = jsonIn.getEffectName();
+            return ForgeRegistries.POTIONS.getValue(new ResourceLocation(name));
+        }
+
         public static EffectInstance getEffectInstanceFromJson(SimpleEffectArg jsonIn) {
             Effect effect = getEffectFromJson(jsonIn);
             if (effect == null) return null;
             return new EffectInstance(effect, jsonIn.getEffectDuration(), jsonIn.getEffectLevel());
         }
 
-        public static boolean effectPredicate(LivingEntity entity, SimpleEffectArg arg) {
+        public static EffectInstance getEffectInstanceFromJson(SimpleEffectCondition jsonIn) {
+            Effect effect = getEffectFromJson(jsonIn);
+            if (effect == null) return null;
+            return new EffectInstance(effect, 0, jsonIn.getEffectLevel());
+        }
+
+        public static boolean effectPredicate(LivingEntity entity, SimpleEffectCondition arg) {
             EffectInstance effect = getEffectInstanceFromJson(arg);
             Collection<EffectInstance> effects = entity.getActivePotionEffects();
-            return effects.isEmpty() ? false : effects.contains(effect);
+            if (MiscHelper.isListValid(effects) && effect != null) {
+                for (EffectInstance instances : effects) {
+                    return instances.getAmplifier() == effect.getAmplifier() && instances.getPotion() == effect.getPotion();
+                }
+            }
+            return false;
         }
     }
 
     public static class Args {
-        public static void execute(PlayerEntity player, @Nullable Entity entity, SimpleArgProvider arg) {
+        public static void execute(PlayerEntity player, @Nullable Entity entity, SimpleArgProvider arg, IJsonConfig json) {
             if (arg == null || player == null) return;
+            ArgProviderType type = arg.getType();
+            if (type.isCondition()) return;
+            if (!type.canArgumentBeLoaded()) return;
             if (arg instanceof SimpleCommandArg) {
                 SimpleCommandArg commandArg = (SimpleCommandArg) arg;
                 executeCommand(player, commandArg);
                 return;
             } else if (arg instanceof SimpleEffectArg) {
                 SimpleEffectArg effectArg = (SimpleEffectArg) arg;
-                if (effectArg.isCondition()) return;
-                executeEffect(player, effectArg);
+                if (effectArg.isPlayer()) {
+                    executeEffect(player, effectArg);
+                } else {
+                    if (entity instanceof LivingEntity) {
+                        LivingEntity livingEntity = (LivingEntity) entity;
+                        executeEffect(livingEntity, effectArg);
+                    }
+                }
                 return;
             } else if (arg instanceof SimpleTransformArg) {
                 SimpleTransformArg transformArg = (SimpleTransformArg) arg;
@@ -655,48 +695,126 @@ public class JsonSerializer {
                 return;
             } else if (arg instanceof SimpleSwingHandArg) {
                 SimpleSwingHandArg swingHandArg = (SimpleSwingHandArg) arg;
-
+                executeSwingHand(player, swingHandArg);
+                return;
+            } else if (arg instanceof SimpleExperienceArg) {
+                SimpleExperienceArg experienceArg = (SimpleExperienceArg) arg;
+                executeExperience(player, experienceArg);
+                return;
+            } else if (arg instanceof SimpleHungerArg) {
+                SimpleHungerArg hungerArg = (SimpleHungerArg) arg;
+                executeHunger(player, hungerArg);
+                return;
+            } else if (arg instanceof SimpleShrinkArg) {
+                SimpleShrinkArg shrinkArg = (SimpleShrinkArg) arg;
+                executeShrink(player, shrinkArg);
+                return;
+            } else if (arg instanceof SimpleParticleArg) {
+                SimpleParticleArg particleArg = (SimpleParticleArg) arg;
+                try {
+                    executeParticle(entity, particleArg);
+                } catch (Exception ignore) {
+                }
+                return;
+            } else if (arg instanceof SimpleSummonArg) {
+                SimpleSummonArg summonArg = (SimpleSummonArg) arg;
+                executeSummon(entity, summonArg);
+                return;
+            } else if (arg instanceof SimpleKillArg) {
+                executeKill(entity);
+                return;
+            } else if (arg instanceof SimpleSoundArg) {
+                SimpleSoundArg soundArg = (SimpleSoundArg) arg;
+                executeSound(entity, soundArg);
+                return;
             }
-            arg.getType().getArgExecutor().accept(player, arg);
+            if (type.getArgExecutor() == null) {
+                ErrorUtils.sendError(new TranslationTextComponent("fclib.reload.conditionNotValid", type.getID(), json.UID()), player);
+                return;
+            }
+            type.getArgExecutor().apply(player, arg);
+        }
+
+        public static boolean executeConditions(PlayerEntity player, @Nullable Entity entity, List<SimpleArgProvider> argList, IJsonConfig json) {
+            if (!MiscHelper.isListValid(argList)) return true;
+            List<Boolean> checks = new ArrayList<>();
+            for (SimpleArgProvider args : argList) {
+                if (args == null) return false;
+                ArgProviderType type = args.getType();
+                if (type == null || !type.isCondition()) {
+                    ErrorUtils.sendError(new TranslationTextComponent("fclib.reload.conditionNotValid", type.getID(), json.UID()), player);
+                    return false;
+                }
+                if (type.canArgumentBeLoaded()) {
+                    if (args instanceof SimpleItemCondition) {
+                        SimpleItemCondition itemCondition = (SimpleItemCondition) args;
+                        checks.add(executeItemCondition(player, itemCondition));
+                    } else if (args instanceof SimpleExperienceCondition) {
+                        SimpleExperienceCondition experienceCondition = (SimpleExperienceCondition) args;
+                        checks.add(executeExperienceCondition(player, experienceCondition));
+                    } else if (args instanceof SimpleHungerCondition) {
+                        SimpleHungerCondition hungerCondition = (SimpleHungerCondition) args;
+                        checks.add(executeHungerCondition(player, hungerCondition));
+                    } else if (args instanceof SimpleEffectCondition) {
+                        if (entity instanceof LivingEntity) {
+                            LivingEntity entityLiving = (LivingEntity) entity;
+                            SimpleEffectCondition effectCondition = (SimpleEffectCondition) args;
+                            if (effectCondition.isPlayer()) {
+                                checks.add(executeEffectCondition(player, effectCondition));
+                            } else {
+                                checks.add(executeEffectCondition(entityLiving, effectCondition));
+                            }
+                        }
+                    } else {
+                        BiFunction<PlayerEntity, SimpleArgProvider, Boolean> executor = type.getArgExecutor();
+                        if (executor == null) return false;
+                        checks.add(executor.apply(player, args));
+                    }
+                }
+            }
+            return !checks.contains(false);
         }
 
         public static void executeCommand(PlayerEntity playerEntity, SimpleCommandArg arg) {
             World world = playerEntity.getEntityWorld();
             String command = arg.getCommand();
             if (!world.isRemote()) {
+                logger.info("Executing Command Argument {}", JsonUtils.jsonStringFromObject(arg));
                 CommandsHelper.executeCommand(playerEntity, command, arg.isRunAsPlayer());
             }
         }
 
         public static void executeEffect(LivingEntity entity, SimpleEffectArg arg) {
             if (entity.getEntityWorld().isRemote()) return;
+            logger.info("Executing Effect Argument {}", JsonUtils.jsonStringFromObject(arg));
             EffectInstance effect = EffectSerializer.getEffectInstanceFromJson(arg);
             if (effect == null) return;
             entity.addPotionEffect(effect);
         }
 
-        public static <T extends Entity> void executeTransform(Entity entityOld, SimpleTransformArg arg) {
+        public static void executeTransform(Entity entityOld, SimpleTransformArg arg) {
             World world = entityOld.getEntityWorld();
             if (world.isRemote()) return;
+
+            logger.info("Executing Transform Argument {}", JsonUtils.jsonStringFromObject(arg));
+
             ServerWorld serverWorld = (ServerWorld) world;
             SimpleEntityProvider entityProvider = arg.getProvider();
             if (entityOld == null || entityProvider == null) return;
-            EntityType<T> entityType = EntitySerialization.getEntityTypeFromJson(entityProvider);
+            EntityType<?> entityType = EntitySerialization.getEntityTypeFromJson(entityProvider);
 
             if (entityType == null) return;
 
             if (!arg.isAllowPeaceful()) {
                 if (world.getDifficulty() != Difficulty.PEACEFUL && Hooks.onEntityTransformPre(entityOld, entityType)) {
-                    T entityToCreate = entityType.create(serverWorld, entityOld.serializeNBT(), null, null, new BlockPos(entityOld.getPosX(), entityOld.getPosY(), entityOld.getPosZ()), SpawnReason.CONVERSION, false, false);
-                    entityToCreate.setLocationAndAngles(entityOld.getPosX(), entityOld.getPosY(), entityOld.getPosZ(), entityOld.rotationYaw, entityOld.rotationPitch);
+                    entityType.spawn(serverWorld, entityOld.serializeNBT(), null, null, new BlockPos(entityOld.getPosX(), entityOld.getPosY(), entityOld.getPosZ()), SpawnReason.CONVERSION, false, false);
                     Hooks.onEntityTransformPost(entityOld, entityType);
                     entityOld.remove();
                 }
             }
 
             if (Hooks.onEntityTransformPre(entityOld, entityType)) {
-                T entityToCreate = entityType.create(serverWorld, entityOld.serializeNBT(), null, null, new BlockPos(entityOld.getPosX(), entityOld.getPosY(), entityOld.getPosZ()), SpawnReason.CONVERSION, false, false);
-                entityToCreate.setLocationAndAngles(entityOld.getPosX(), entityOld.getPosY(), entityOld.getPosZ(), entityOld.rotationYaw, entityOld.rotationPitch);
+                entityType.spawn(serverWorld, entityOld.serializeNBT(), null, null, new BlockPos(entityOld.getPosX(), entityOld.getPosY(), entityOld.getPosZ()), SpawnReason.CONVERSION, false, false);
                 Hooks.onEntityTransformPost(entityOld, entityType);
                 entityOld.remove();
             }
@@ -706,12 +824,16 @@ public class JsonSerializer {
             World world = entityOld.getEntityWorld();
             if (world.isRemote()) return;
             if (entityOld == null) return;
+            logger.info("Executing Kill Argument on Entity, UUID: {}, registry name: {}", entityOld.getUniqueID(), entityOld.getType().getRegistryName());
             entityOld.onKillCommand();
         }
 
-        public static void executeSwingHand(LivingEntity entity, SimpleSwingHandArg arg) {
-            SimpleSwingHandArg.JsonHandTypes handType = arg.handType();
+        public static void executeSwingHand(PlayerEntity entity, SimpleSwingHandArg arg) {
             if (!entity.getEntityWorld().isRemote()) {
+                JsonUtils.JsonHandTypes handType = arg.getHandType();
+
+                logger.info("Executing Swing Hand Argument {}", JsonUtils.jsonStringFromObject(arg));
+
                 switch (handType) {
                     case MAIN:
                         entity.swingArm(Hand.MAIN_HAND);
@@ -724,6 +846,175 @@ public class JsonSerializer {
                         break;
                 }
             }
+        }
+
+        public static void executeExperience(PlayerEntity player, SimpleExperienceArg arg) {
+            if (!player.getEntityWorld().isRemote()) {
+                boolean isLevel = arg.isLevel();
+                int amount = arg.getAmount();
+
+                logger.info("Executing Hunger Argument {}", JsonUtils.jsonStringFromObject(arg));
+
+                if (isLevel) {
+                    player.addExperienceLevel(amount);
+                } else {
+                    player.giveExperiencePoints(amount);
+                }
+            }
+        }
+
+        public static void executeHunger(PlayerEntity playerEntity, SimpleHungerArg arg) {
+            if (!playerEntity.getEntityWorld().isRemote()) {
+                float amount = arg.getAmount();
+
+                logger.info("Executing Hunger Argument {}", JsonUtils.jsonStringFromObject(arg));
+
+                if (arg.isExhaust()) {
+                    playerEntity.addExhaustion(amount);
+                } else {
+                    playerEntity.getFoodStats().addStats((int) amount, 0);
+                }
+            }
+        }
+
+        public static void executeShrink(PlayerEntity player, SimpleShrinkArg arg) {
+            if (!player.getEntityWorld().isRemote()) {
+                logger.info("Executing Shrink Argument {}", JsonUtils.jsonStringFromObject(arg));
+
+                ItemStack stack = player.getHeldItem(player.getActiveHand());
+                stack.shrink(arg.getAmount());
+            }
+        }
+
+        public static <T extends IParticleData> void executeParticle(Entity entity, SimpleParticleArg arg) throws CommandSyntaxException {
+            if (!entity.getEntityWorld().isRemote()) {
+                logger.info("Executing Particle Argument {}", JsonUtils.jsonStringFromObject(arg));
+
+                ServerWorld world = (ServerWorld) entity.getEntityWorld();
+                if (arg == null) return;
+                String particleName = arg.getParticle();
+                if (!MiscHelper.isStringValid(particleName)) return;
+                ParticleType<T> particleType = (ParticleType<T>) ForgeRegistries.PARTICLE_TYPES.getValue(new ResourceLocation(particleName));
+                if (particleType != null) {
+                    T particle = particleType.getDeserializer().deserialize(particleType, new StringReader(particleName));
+                    world.spawnParticle(particle, entity.getPosX(), entity.getPosY(), entity.getPosZ(), arg.getAmount(), arg.getxMod(), arg.getyMod(), arg.getzMod(), arg.getSpeed());
+                }
+            }
+        }
+
+        public static void executeSummon(Entity entity, SimpleSummonArg arg) {
+            if (!entity.getEntityWorld().isRemote()) {
+                logger.info("Executing Summon Argument {}", JsonUtils.jsonStringFromObject(arg));
+
+                if (arg == null) return;
+                SimpleEntityProvider entityProvider = arg.getEntityToSummon();
+                if (entityProvider == null) return;
+                EntityType<?> entityType = EntitySerialization.getEntityTypeFromJson(entityProvider);
+                if (entityType == null) return;
+                entityType.spawn((ServerWorld) entity.getEntityWorld(), ItemStack.EMPTY, null, entity.getPosition(), SpawnReason.SPAWN_EGG, false, false);
+            }
+        }
+
+        public static void executeSound(Entity entity, SimpleSoundArg arg) {
+            World world = entity.getEntityWorld();
+            if (!world.isRemote()) {
+                logger.info("Executing Sound Argument {}", JsonUtils.jsonStringFromObject(arg));
+                String name = arg.getSound();
+                if (!MiscHelper.isStringValid(name)) return;
+                SoundEvent sound = ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation(name));
+                if (sound == null) return;
+                world.playSound(null, entity.getPosition(),sound , arg.getSoundCategory(), arg.getVolume(), arg.getPitch());
+            }
+        }
+
+        public static boolean executeItemCondition(PlayerEntity player, SimpleItemCondition condition) {
+            if (!player.getEntityWorld().isRemote()) {
+
+                JsonUtils.JsonHandTypes handType = condition.getHandType();
+                SimpleItemProvider itemProvider = condition.getItemRequired();
+
+                logger.info("Executing Item Condition {}", JsonUtils.jsonStringFromObject(condition));
+
+                switch (handType) {
+                    case MAIN:
+                        ItemStack held = player.getHeldItemMainhand();
+                        return ItemStackSerializer.doesItemStackMatch(held, itemProvider);
+                    case OFF:
+                        ItemStack heldOff = player.getHeldItemOffhand();
+                        return ItemStackSerializer.doesItemStackMatch(heldOff, itemProvider);
+                    case DEFAULT:
+                        ItemStack heldDefault = player.getHeldItem(player.getActiveHand());
+                        return ItemStackSerializer.doesItemStackMatch(heldDefault, itemProvider);
+                }
+            }
+
+            return false;
+        }
+
+        public static boolean executeExperienceCondition(PlayerEntity player, SimpleExperienceCondition condition) {
+            if (!player.getEntityWorld().isRemote()) {
+                boolean isBelow = condition.isBelow();
+                boolean isLevel = condition.isLevel();
+                float amount = condition.getAmount();
+
+                float xp = player.experience;
+                int level = player.experienceLevel;
+
+                logger.info("Executing Experience Condition {}", JsonUtils.jsonStringFromObject(condition));
+
+                if (isBelow) {
+                    if (isLevel) {
+                        return level < condition.getAmount();
+                    } else {
+                        return xp < condition.getAmount();
+                    }
+                } else {
+                    if (isLevel) {
+                        return level > condition.getAmount();
+                    } else {
+                        return xp > condition.getAmount();
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        public static boolean executeHungerCondition(PlayerEntity player, SimpleHungerCondition condition) {
+            if (!player.getEntityWorld().isRemote()) {
+                boolean isBelow = condition.isBelow();
+                boolean isSaturation = condition.isSaturation();
+                float amount = condition.getAmount();
+                int foodLevel = player.getFoodStats().getFoodLevel();
+                float saturation = player.getFoodStats().getSaturationLevel();
+
+                logger.info("Executing Hunger Condition {}", JsonUtils.jsonStringFromObject(condition));
+
+                if (isBelow) {
+                    if (isSaturation) {
+                        return saturation < amount;
+                    } else {
+                        return foodLevel < amount;
+                    }
+                } else {
+                    if (isSaturation) {
+                        return saturation > amount;
+                    } else {
+                        return foodLevel > amount;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        public static boolean executeEffectCondition(LivingEntity entity, SimpleEffectCondition condition) {
+            if (!entity.getEntityWorld().isRemote()) {
+                logger.info("Executing Effect Condition {}", JsonUtils.jsonStringFromObject(condition));
+
+                return EffectSerializer.effectPredicate(entity, condition);
+            }
+            return false;
         }
     }
 

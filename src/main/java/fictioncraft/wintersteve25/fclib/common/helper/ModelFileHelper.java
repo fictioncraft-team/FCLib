@@ -1,10 +1,8 @@
 package fictioncraft.wintersteve25.fclib.common.helper;
 
-import net.minecraft.block.Block;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.generators.BlockModelProvider;
 import net.minecraftforge.client.model.generators.ModelFile;
-import net.minecraftforge.common.IExtensibleEnum;
 
 import static fictioncraft.wintersteve25.fclib.common.helper.ResourceLocationHelper.extend;
 
