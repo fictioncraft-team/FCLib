@@ -8,10 +8,7 @@ import fictioncraft.wintersteve25.fclib.api.json.ErrorUtils;
 import fictioncraft.wintersteve25.fclib.api.json.base.IJsonConfig;
 import fictioncraft.wintersteve25.fclib.api.json.objects.providers.arg.ArgProviderType;
 import fictioncraft.wintersteve25.fclib.api.json.objects.providers.arg.SimpleArgProvider;
-import fictioncraft.wintersteve25.fclib.api.json.objects.providers.arg.template.condition.SimpleEffectCondition;
-import fictioncraft.wintersteve25.fclib.api.json.objects.providers.arg.template.condition.SimpleExperienceCondition;
-import fictioncraft.wintersteve25.fclib.api.json.objects.providers.arg.template.condition.SimpleHungerCondition;
-import fictioncraft.wintersteve25.fclib.api.json.objects.providers.arg.template.condition.SimpleItemCondition;
+import fictioncraft.wintersteve25.fclib.api.json.objects.providers.arg.template.condition.*;
 import fictioncraft.wintersteve25.fclib.api.json.objects.providers.arg.template.effects.*;
 import fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.ObjProviderType;
 import fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.ISimpleObjProvider;
@@ -19,10 +16,7 @@ import fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.templates
 import fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.templates.SimpleEntityProvider;
 import fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.templates.SimpleFluidProvider;
 import fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.templates.SimpleItemProvider;
-import fictioncraft.wintersteve25.fclib.common.helper.CommandsHelper;
-import fictioncraft.wintersteve25.fclib.common.helper.MiscHelper;
-import fictioncraft.wintersteve25.fclib.common.helper.ModListHelper;
-import fictioncraft.wintersteve25.fclib.common.helper.TriFunction;
+import fictioncraft.wintersteve25.fclib.common.helper.*;
 import javafx.util.Pair;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -45,10 +39,7 @@ import net.minecraft.state.Property;
 import net.minecraft.tags.ITag;
 import net.minecraft.tags.TagCollectionManager;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.Difficulty;
@@ -670,7 +661,7 @@ public class JsonSerializer {
     }
 
     public static class Args {
-        public static void execute(PlayerEntity player, @Nullable Entity entity, SimpleArgProvider arg, IJsonConfig json) {
+        public static void executeEntity(PlayerEntity player, @Nullable Entity entity, SimpleArgProvider arg, IJsonConfig json) {
             if (arg == null || player == null) return;
             ArgProviderType type = arg.getType();
             if (type.isCondition()) return;
@@ -728,7 +719,24 @@ public class JsonSerializer {
                 SimpleSoundArg soundArg = (SimpleSoundArg) arg;
                 executeSound(entity, soundArg);
                 return;
+            } else if (arg instanceof SimpleGiveItemArg) {
+                SimpleGiveItemArg giveItemArg = (SimpleGiveItemArg) arg;
+                executeGiveItem(entity, player, giveItemArg);
+                return;
+            } else if (arg instanceof SimpleHurtArg) {
+                SimpleHurtArg hurtArg = (SimpleHurtArg) arg;
+                executeHurt(entity, player, hurtArg);
+                return;
+            } else if (arg instanceof SimpleDamageItemArg) {
+                SimpleDamageItemArg damageItemArg = (SimpleDamageItemArg) arg;
+                executeDamageItem(player, damageItemArg);
+                return;
+            } else if (arg instanceof SimpleCooldownArg) {
+                SimpleCooldownArg cooldownArg = (SimpleCooldownArg) arg;
+                executeCoolDown(player, cooldownArg);
+                return;
             }
+
             TriFunction<PlayerEntity, Entity, SimpleArgProvider, Boolean> executor = type.getArgExecutor();
 
             if (executor == null) {
@@ -768,6 +776,9 @@ public class JsonSerializer {
                                 checks.add(executeEffectCondition(entityLiving, effectCondition));
                             }
                         }
+                    } else if (args instanceof SimpleCooldownCondition) {
+                        SimpleCooldownCondition cooldownCondition = (SimpleCooldownCondition) args;
+                        checks.add(executeCooldownCondition(player, cooldownCondition));
                     } else {
                         TriFunction<PlayerEntity, Entity, SimpleArgProvider, Boolean> executor = type.getArgExecutor();
                         if (executor == null) return false;
@@ -926,7 +937,96 @@ public class JsonSerializer {
                 if (!MiscHelper.isStringValid(name)) return;
                 SoundEvent sound = ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation(name));
                 if (sound == null) return;
-                world.playSound(null, entity.getPosition(),sound , arg.getSoundCategory(), arg.getVolume(), arg.getPitch());
+                world.playSound(null, entity.getPosition(), sound, arg.getSoundCategory(), arg.getVolume(), arg.getPitch());
+            }
+        }
+
+        public static void executeGiveItem(Entity entity, PlayerEntity player, SimpleGiveItemArg arg) {
+            if (!player.getEntityWorld().isRemote()) {
+                logger.info("Executing Give Item Argument {}", JsonUtils.jsonStringFromObject(arg));
+
+                ItemStack stack = ItemStackSerializer.getItemStackFromJsonItemStack(arg.getItem());
+                if (MiscHelper.chanceHandling(arg.getChance()) && !stack.isEmpty()) {
+                    if (arg.isDropToGround()) {
+                        ISHandlerHelper.dropItem(player.getEntityWorld(), entity.getPosition(), stack);
+                    } else {
+                        player.addItemStackToInventory(stack);
+                    }
+                }
+            }
+        }
+
+        public static void executeHurt(Entity entity, PlayerEntity player, SimpleHurtArg arg) {
+            if (!player.getEntityWorld().isRemote()) {
+                logger.info("Executing Hurt Argument {}", JsonUtils.jsonStringFromObject(arg));
+
+                if (arg.isPlayer()) {
+                    if (arg.isByPassAmour()) {
+                        player.attackEntityFrom(DamageSource.GENERIC, arg.getDamage());
+                    } else {
+                        if (arg.isCountPlayerKill()) {
+                            player.attackEntityFrom(DamageSource.causePlayerDamage(player), arg.getDamage());
+                        } else {
+                            player.attackEntityFrom(FCLibMod.GENERIC_DAMAGE, arg.getDamage());
+                        }
+                    }
+                } else {
+                    if (arg.isByPassAmour()) {
+                        entity.attackEntityFrom(DamageSource.GENERIC, arg.getDamage());
+                    } else {
+                        if (arg.isCountPlayerKill()) {
+                            entity.attackEntityFrom(DamageSource.causePlayerDamage(player), arg.getDamage());
+                        } else {
+                            entity.attackEntityFrom(FCLibMod.GENERIC_DAMAGE, arg.getDamage());
+                        }
+                    }
+                }
+            }
+        }
+
+        public static void executeDamageItem(PlayerEntity player, SimpleDamageItemArg arg) {
+            if (!player.getEntityWorld().isRemote()) {
+                switch (arg.getHandType()) {
+                    case MAIN:
+                        ItemStack held = player.getHeldItemMainhand();
+                        held.damageItem(arg.getAmount(), player, (var1) -> {
+                            var1.sendBreakAnimation(Hand.MAIN_HAND);
+                        });
+                        break;
+                    case OFF:
+                        ItemStack heldOff = player.getHeldItemOffhand();
+                        heldOff.damageItem(arg.getAmount(), player, (var1) -> {
+                            var1.sendBreakAnimation(Hand.OFF_HAND);
+                        });
+                        break;
+                    case DEFAULT:
+                        ItemStack heldDefault = player.getHeldItem(player.getActiveHand());
+                        heldDefault.damageItem(arg.getAmount(), player, (var1) -> {
+                            var1.sendBreakAnimation(player.getActiveHand());
+                        });
+                        break;
+                }
+            }
+        }
+
+        public static void executeCoolDown(PlayerEntity player, SimpleCooldownArg arg) {
+            if (!player.getEntityWorld().isRemote()) {
+
+                switch (arg.getHandType()) {
+                    case MAIN:
+                        ItemStack held = player.getHeldItemMainhand();
+                        player.getCooldownTracker().setCooldown(held.getItem(), arg.getCooldown());
+
+                        break;
+                    case OFF:
+                        ItemStack heldOff = player.getHeldItemOffhand();
+                        player.getCooldownTracker().setCooldown(heldOff.getItem(), arg.getCooldown());
+                        break;
+                    case DEFAULT:
+                        ItemStack heldDefault = player.getHeldItem(player.getActiveHand());
+                        player.getCooldownTracker().setCooldown(heldDefault.getItem(), arg.getCooldown());
+                        break;
+                }
             }
         }
 
@@ -948,6 +1048,21 @@ public class JsonSerializer {
                     case DEFAULT:
                         ItemStack heldDefault = player.getHeldItem(player.getActiveHand());
                         return ItemStackSerializer.doesItemStackMatch(heldDefault, itemProvider);
+                }
+            }
+
+            return false;
+        }
+
+        public static boolean executeCooldownCondition(PlayerEntity player, SimpleCooldownCondition condition) {
+            if (!player.getEntityWorld().isRemote()) {
+                switch (condition.getHandType()) {
+                    case MAIN:
+                        return !player.getCooldownTracker().hasCooldown(player.getHeldItemMainhand().getItem());
+                    case OFF:
+                        return !player.getCooldownTracker().hasCooldown(player.getHeldItemOffhand().getItem());
+                    case DEFAULT:
+                        return !player.getCooldownTracker().hasCooldown(player.getHeldItem(player.getActiveHand()).getItem());
                 }
             }
 

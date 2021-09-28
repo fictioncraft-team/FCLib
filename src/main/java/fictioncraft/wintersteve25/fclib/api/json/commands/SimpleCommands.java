@@ -27,15 +27,16 @@ public class SimpleCommands {
         return 1;
     }
 
-    public static int args(CommandSource source) throws CommandSyntaxException {
+    public static int args(CommandSource source) {
         List<ArgProviderType> types = FCLibMod.ARG_PROVIDER_TYPES;
         if (MiscHelper.isListValid(types)) {
             for (ArgProviderType type : types) {
                 if (type.canArgumentBeLoaded()) {
                     source.sendFeedback(new TranslationTextComponent(type.getID()), true);
-                    return 1;
                 }
             }
+
+            return 1;
         }
         return 0;
     }

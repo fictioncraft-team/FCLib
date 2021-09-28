@@ -8,7 +8,7 @@ public class SimpleItemCondition extends SimpleArgProvider {
     private final SimpleItemProvider itemRequired;
     private final JsonUtils.JsonHandTypes handType;
 
-    public SimpleItemCondition(SimpleItemProvider itemRequired, JsonUtils.JsonHandTypes handType) {
+    public SimpleItemCondition(SimpleItemProvider itemRequired, JsonUtils.JsonHandTypes handType, boolean cooldownMatters) {
         super("C_ItemStack");
         this.itemRequired = itemRequired;
         this.handType = handType;

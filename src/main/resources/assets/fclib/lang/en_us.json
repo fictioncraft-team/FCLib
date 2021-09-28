@@ -9,5 +9,6 @@
   "fclib.reload.notSupported": "Command not implemented",
   "fclib.reload.argumentNotValid": "§cFCLib Error: Given %s §cargument in %s §cConfig is not valid or does not have a valid executor. If you are sure the argument is valid, report this to the mod that adds the argument",
   "fclib.reload.conditionNotValid": "§cFCLib Error: Given %s §ccondition in %s §cConfig is not valid or does not have a valid executor. If you are sure the condition is valid, report this to the mod that adds the condition",
-  "fclib.hoverText.clickToCopy": "Click To Copy"
+  "fclib.hoverText.clickToCopy": "Click To Copy",
+  "death.attack.generic_nobypass": "%1$s Mysteriously vaporized from the world..."
 }
