@@ -20,8 +20,6 @@ import fictioncraft.wintersteve25.fclib.common.helper.*;
 import javafx.util.Pair;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.audio.SimpleSound;
-import net.minecraft.client.world.ClientWorld;
 import net.minecraft.command.arguments.BlockStateParser;
 import net.minecraft.entity.*;
 import net.minecraft.entity.player.PlayerEntity;
@@ -55,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.BiFunction;
 
 import static fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.ObjProviderType.*;
 
@@ -661,7 +658,7 @@ public class JsonSerializer {
     }
 
     public static class Args {
-        public static void executeEntity(PlayerEntity player, @Nullable Entity entity, SimpleArgProvider arg, IJsonConfig json) {
+        public static void executeFromEntity(PlayerEntity player, @Nullable Entity entity, SimpleArgProvider arg, IJsonConfig json) {
             if (arg == null || player == null) return;
             ArgProviderType type = arg.getType();
             if (type.isCondition()) return;

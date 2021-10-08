@@ -12,6 +12,7 @@ import fictioncraft.wintersteve25.fclib.api.json.objects.providers.arg.template.
 import fictioncraft.wintersteve25.fclib.api.json.objects.providers.obj.ObjProviderType;
 import fictioncraft.wintersteve25.fclib.api.json.utils.JsonConfigManager;
 import fictioncraft.wintersteve25.fclib.api.json.utils.JsonUtils;
+import fictioncraft.wintersteve25.fclib.common.network.FCLibNetworking;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.util.DamageSource;
@@ -42,7 +43,6 @@ public class FCLibMod {
     public static DamageSource GENERIC_DAMAGE = new DamageSource("generic_nobypass");
 
     public FCLibMod() {
-        logger.info("o/ Hi! I hope you are having a wonderful day :)");
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, FCLibConfig.SERVER_CONFIG);
         MinecraftForge.EVENT_BUS.addListener(FCLibMod::serverStartup);
         MinecraftForge.EVENT_BUS.addListener(FCLibMod::playerLogIn);
@@ -52,6 +52,9 @@ public class FCLibMod {
     }
 
     public static void commonSetup(FMLLoadCompleteEvent event) {
+        logger.info("o/ Hi! I hope you are having a wonderful day :)");
+        FCLibNetworking.registerMessages();
+
         logger.info("Creating directory...");
         JsonUtils.createDirectory();
 

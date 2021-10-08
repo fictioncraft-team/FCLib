@@ -4,6 +4,10 @@ import fictioncraft.wintersteve25.fclib.api.json.base.IJsonConfig;
 import fictioncraft.wintersteve25.fclib.api.json.utils.JsonConfigManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 
 public class Hooks {
@@ -32,5 +36,9 @@ public class Hooks {
     public static void onEntityTransformPost(Entity entityOld, EntityType<?> entityType) {
         EntityTransformEvent.Post event = new EntityTransformEvent.Post(entityOld, entityType);
         MinecraftForge.EVENT_BUS.post(event);
+    }
+
+    public static void onPlayerMove(PlayerEntity player, PlayerMovedEvent.MovementTypes movementTypes) {
+        MinecraftForge.EVENT_BUS.post(new PlayerMovedEvent(movementTypes, player));
     }
 }
