@@ -2,11 +2,13 @@ package fictioncraft.wintersteve25.fclib.api.json.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import com.teamacronymcoders.packmode.PackModeAPIImpl;
 import fictioncraft.wintersteve25.fclib.FCLibConfig;
 import fictioncraft.wintersteve25.fclib.FCLibMod;
 import fictioncraft.wintersteve25.fclib.api.events.Hooks;
 import fictioncraft.wintersteve25.fclib.api.events.JsonConfigEvent;
+import fictioncraft.wintersteve25.fclib.api.json.ErrorUtils;
 import fictioncraft.wintersteve25.fclib.api.json.base.IJsonConfig;
 import fictioncraft.wintersteve25.fclib.api.json.compat.PackModeCompat;
 import fictioncraft.wintersteve25.fclib.common.helper.ModListHelper;
@@ -112,7 +114,11 @@ public class JsonUtils {
         for (IJsonConfig configs : FCLibMod.configManager.jsonConfigMap.keySet()) {
             if (configs != null) {
                 if (Hooks.onJsonLoadPre(configs, FCLibConfig.GENERATE_EXAMPLE.get(), JsonConfigEvent.JsonConfigLoadStages.READ)) {
-                    configs.read();
+                    try {
+                        configs.read();
+                    } catch (JsonSyntaxException e){
+                        ErrorUtils.cacheError(e.getMessage(), configs);
+                    }
                     Hooks.onJsonLoadPost(configs, FCLibConfig.GENERATE_EXAMPLE.get(), JsonConfigEvent.JsonConfigLoadStages.READ);
                     FCLibMod.logger.info("Read {} config", configs.UID());
                 }

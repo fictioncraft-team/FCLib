@@ -1,16 +1,16 @@
 package fictioncraft.wintersteve25.fclib.api.json;
 
 import fictioncraft.wintersteve25.fclib.FCLibMod;
-import fictioncraft.wintersteve25.fclib.api.json.objects.SimpleObjectMap;
-import fictioncraft.wintersteve25.fclib.common.helper.MiscHelper;
 import fictioncraft.wintersteve25.fclib.api.json.base.IJsonConfig;
 import fictioncraft.wintersteve25.fclib.api.json.objects.SimpleConfigObject;
-import fictioncraft.wintersteve25.fclib.api.json.utils.JsonConfigManager;
+import fictioncraft.wintersteve25.fclib.api.json.objects.SimpleObjectMap;
 import fictioncraft.wintersteve25.fclib.api.json.utils.JsonSerializer;
 import fictioncraft.wintersteve25.fclib.api.json.utils.JsonUtils;
+import fictioncraft.wintersteve25.fclib.common.helper.MiscHelper;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.text.TranslationTextComponent;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +19,7 @@ public class ErrorUtils {
     public static final String TARGET_NOT_FOUND = "fclib.reload.failed.targetNotFound";
     public static final String NO_VALID_CONFIG = "fclib.reload.failed.noValidConfigs";
     public static final TranslationTextComponent RELOAD_SUCCESS = new TranslationTextComponent("fclib.reload.success");
+    private static final Map<String, IJsonConfig> cachedErrors = new HashMap<>();
 
     public static void sendError(TranslationTextComponent text, PlayerEntity player) {
         player.sendMessage(text, player.getUniqueID());
@@ -32,9 +33,17 @@ public class ErrorUtils {
         sendError(text.getText(), player, config);
     }
 
+    public static void cacheError(String text, IJsonConfig config) {
+        cachedErrors.put(text, config);
+    }
+
     public static void handle(PlayerEntity player) {
         JsonUtils.createJson();
         JsonUtils.loadJson();
+
+        for (String error : cachedErrors.keySet()) {
+            sendError(error, player, cachedErrors.get(error));
+        }
 
         for (IJsonConfig config : FCLibMod.configManager.jsonConfigMap.keySet()) {
             if (config != null && config.finishedConfig() != null) {
