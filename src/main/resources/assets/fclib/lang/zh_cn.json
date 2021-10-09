@@ -7,8 +7,9 @@
   "fclib.reload.success": "§a如上方没有任何错误，所有FCLib的Json配置文件都以成功全部重新加载",
   "fclib.reload.useForgeDimension": "使用/forge dimensions如要查看已注册的次元，配置文件中用\"Default\"作为type",
   "fclib.reload.notSupported": "无效命令",
+  "fclib.reload.argumentNotValid": "§cFCLib错误: %s§c参数无效或没有有效的执行器。如果你确定该参数是有效的，请向添加该参数的mod报告",
+  "fclib.reload.conditionNotValid": "§cFCLib错误: %s§c条件无效或没有有效的执行器。如果你确定该条件是有效的，请向添加该条件的mod报告",
+  "fclib.reload.jsonSyntaxError": "§cFCLib错误: Json语法错误%s在%s中",
   "fclib.hoverText.clickToCopy": "点击复制",
-  "fclib.reload.argumentNotValid": "§ccFCLib错误: %s§c参数无效或没有有效的执行器。如果你确定该参数是有效的，请向添加该参数的mod报告",
-  "fclib.reload.conditionNotValid": "§ccFCLib错误: %s§c条件无效或没有有效的执行器。如果你确定该条件是有效的，请向添加该条件的mod报告",
   "death.attack.generic_nobypass": "%1$s人间蒸发了"
 }

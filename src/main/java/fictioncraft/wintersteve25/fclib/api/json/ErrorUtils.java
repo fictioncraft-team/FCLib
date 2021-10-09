@@ -8,6 +8,7 @@ import fictioncraft.wintersteve25.fclib.api.json.utils.JsonSerializer;
 import fictioncraft.wintersteve25.fclib.api.json.utils.JsonUtils;
 import fictioncraft.wintersteve25.fclib.common.helper.MiscHelper;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 
 import java.util.HashMap;
@@ -23,10 +24,12 @@ public class ErrorUtils {
 
     public static void sendError(TranslationTextComponent text, PlayerEntity player) {
         player.sendMessage(text, player.getUniqueID());
+        FCLibMod.logger.info(text);
     }
 
     public static void sendError(String text, PlayerEntity player, IJsonConfig config) {
         player.sendMessage(new TranslationTextComponent(text, config.UID()), player.getUniqueID());
+        FCLibMod.logger.info(text);
     }
 
     public static void sendError(ErrorTypes text, PlayerEntity player, IJsonConfig config) {
@@ -42,7 +45,9 @@ public class ErrorUtils {
         JsonUtils.loadJson();
 
         for (String error : cachedErrors.keySet()) {
-            sendError(error, player, cachedErrors.get(error));
+            TranslationTextComponent text = new TranslationTextComponent("fclib.reload.jsonSyntaxError", error, cachedErrors.get(error));
+            text.mergeStyle(TextFormatting.RED);
+            sendError(text, player);
         }
 
         for (IJsonConfig config : FCLibMod.configManager.jsonConfigMap.keySet()) {
