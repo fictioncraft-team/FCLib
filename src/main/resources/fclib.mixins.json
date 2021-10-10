@@ -1,12 +1,11 @@
 {
   "required": true,
   "package": "fictioncraft.wintersteve25.fclib.common.mixin",
-  "compatibilityLevel": "JAVA_8",
-  "refmap": "oniutils.refmap.json",
+  "refmap": "fclib.refmap.json",
   "mixins": [
+    "InventoryChangeTriggerMixin"
   ],
   "server": [
-    "InventoryChangeTriggerMixin"
   ],
   "client": [
   ],

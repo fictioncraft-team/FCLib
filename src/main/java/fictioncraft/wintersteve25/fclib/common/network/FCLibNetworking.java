@@ -16,9 +16,9 @@ public class FCLibNetworking {
     }
 
     public static void registerMessages() {
-        FCLibMod.logger.info("Registering ONIUtils networkings");
+        FCLibMod.logger.info("Registering FCLib networkings");
 
-        INSTANCE = NetworkRegistry.newSimpleChannel(new ResourceLocation("fclib", "oniutils"),
+        INSTANCE = NetworkRegistry.newSimpleChannel(new ResourceLocation("fclib", "fclib_network"),
                 () -> "1.0",
                 s -> true,
                 s -> true);
