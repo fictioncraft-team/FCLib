@@ -58,7 +58,7 @@ public class FCLibDirectionalBlock extends DirectionalBlock implements IFCDataGe
 
     @Override
     public BlockState getStateForPlacement(BlockItemUseContext blockItemUseContext) {
-        return this.getDefaultState().with(FACING, blockItemUseContext.getFace());
+        return this.getDefaultState().with(FACING, blockItemUseContext.getNearestLookingDirection());
     }
 
     @Override

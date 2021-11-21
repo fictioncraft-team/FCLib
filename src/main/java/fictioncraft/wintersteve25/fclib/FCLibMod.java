@@ -1,7 +1,6 @@
 package fictioncraft.wintersteve25.fclib;
 
 import com.mojang.brigadier.CommandDispatcher;
-import fictioncraft.wintersteve25.example.EventTest;
 import fictioncraft.wintersteve25.fclib.api.events.Hooks;
 import fictioncraft.wintersteve25.fclib.api.json.ErrorUtils;
 import fictioncraft.wintersteve25.fclib.api.json.commands.DumpInfoCommand;
