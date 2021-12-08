@@ -6,13 +6,16 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.util.Direction;
+import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.HashMap;
-import java.util.List;
 
 public abstract class FCLibTEInv extends FCLibTE {
 
@@ -23,13 +26,14 @@ public abstract class FCLibTEInv extends FCLibTE {
         super(te);
     }
 
+    public void onItemAdded() {
+    }
+
     public ItemStackHandler getItemHandler() {
         return itemHandler;
     }
 
     public abstract int getInvSize();
-
-    public abstract List<Item> validItems();
 
     public boolean hasItem() {
         for (int i = 0; i < getInvSize(); i++) {
@@ -43,28 +47,40 @@ public abstract class FCLibTEInv extends FCLibTE {
     @Override
     public void read(BlockState state, CompoundNBT tag) {
         itemHandler.deserializeNBT(tag.getCompound("inv"));
-
         super.read(state, tag);
     }
 
     @Override
     public CompoundNBT write(CompoundNBT tag) {
         tag.put("inv", itemHandler.serializeNBT());
-
         return super.write(tag);
     }
 
+    @Nonnull
+    @Override
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
+        if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+            return itemLazyOptional.cast();
+        }
+        return super.getCapability(cap, side);
+    }
+
     public static class FCLibInventoryHandler extends ItemStackHandler {
-        private final FCLibTEInv tile;
+        protected final FCLibTEInv tile;
 
         public FCLibInventoryHandler(FCLibTEInv inv) {
-            super(inv.getInvSize());
+            this(inv.getInvSize(), inv);
+        }
+
+        public FCLibInventoryHandler(int size, FCLibTEInv inv) {
+            super(size);
             tile = inv;
         }
 
         @Override
         public void onContentsChanged(int slot) {
             tile.updateBlock();
+            tile.onItemAdded();
         }
 
         @Override

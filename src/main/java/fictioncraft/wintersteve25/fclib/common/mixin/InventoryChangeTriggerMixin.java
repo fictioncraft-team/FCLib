@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(InventoryChangeTrigger.class)
 public class InventoryChangeTriggerMixin {
     @Inject(method = "trigger", at = @At(value = "HEAD", target = "Lnet/minecraft/advancements/criterion/InventoryChangeTrigger;trigger(Lnet/minecraft/entity/player/ServerPlayerEntity;Lnet/minecraft/entity/player/PlayerInventory;Lnet/minecraft/item/ItemStack;III)V"))
-    public void trigger(ServerPlayerEntity player, PlayerInventory inventory, ItemStack stack, int full, int empty, int occupied, CallbackInfo ci) {
+    public void onTrigger(ServerPlayerEntity player, PlayerInventory inventory, ItemStack stack, int full, int empty, int occupied, CallbackInfo ci) {
         if (!player.getEntityWorld().isRemote()) {
             PlayerInventoryChangedEvent event = new PlayerInventoryChangedEvent(player, inventory, stack, full, empty, occupied);
             MinecraftForge.EVENT_BUS.post(event);

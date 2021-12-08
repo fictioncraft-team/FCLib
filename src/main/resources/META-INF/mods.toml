@@ -1,6 +1,6 @@
 modLoader="javafml" #mandatory
 loaderVersion="[36,)" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
-license="COFH Don't Be A Jerk"
+license="MIT"
 [[mods]] #mandatory
 modId="fclib" #mandatory
 version="${file.jarVersion}" #mandatory

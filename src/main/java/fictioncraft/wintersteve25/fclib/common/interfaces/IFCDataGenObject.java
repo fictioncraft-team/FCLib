@@ -6,6 +6,9 @@ import net.minecraftforge.registries.ForgeRegistryEntry;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Should be implemented in a {@link net.minecraft.block.Block} or {@link Item}
+ */
 public interface IFCDataGenObject<I extends ForgeRegistryEntry> {
     String regName();
 
