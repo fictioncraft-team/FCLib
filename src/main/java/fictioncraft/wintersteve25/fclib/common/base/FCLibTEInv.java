@@ -2,7 +2,6 @@ package fictioncraft.wintersteve25.fclib.common.base;
 
 import fictioncraft.wintersteve25.fclib.common.interfaces.IHasValidItems;
 import net.minecraft.block.BlockState;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntityType;
@@ -15,7 +14,7 @@ import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashMap;
+import java.util.function.BiPredicate;
 
 public abstract class FCLibTEInv extends FCLibTE {
 
@@ -26,7 +25,7 @@ public abstract class FCLibTEInv extends FCLibTE {
         super(te);
     }
 
-    public void onItemAdded() {
+    public void onItemAdded(int slot) {
     }
 
     public ItemStackHandler getItemHandler() {
@@ -80,7 +79,7 @@ public abstract class FCLibTEInv extends FCLibTE {
         @Override
         public void onContentsChanged(int slot) {
             tile.updateBlock();
-            tile.onItemAdded();
+            tile.onItemAdded(slot);
         }
 
         @Override
@@ -89,12 +88,9 @@ public abstract class FCLibTEInv extends FCLibTE {
                 return true;
             }
             IHasValidItems validItems = (IHasValidItems) tile;
-            HashMap<Item, Integer> valids = validItems.validItems();
-            if (valids == null || valids.isEmpty()) return true;
-            if (valids.containsKey(stack.getItem())) {
-                return slot == valids.get(stack.getItem()) || valids.get(stack.getItem()) < 0;
-            }
-            return false;
+            BiPredicate<ItemStack, Integer> valids = validItems.validItems();
+            if (valids == null) return true;
+            return valids.test(stack, slot);
         }
 
         @Nonnull
@@ -104,17 +100,11 @@ public abstract class FCLibTEInv extends FCLibTE {
                 return super.insertItem(slot, stack, simulate);
             }
             IHasValidItems validItems = (IHasValidItems) tile;
-            HashMap<Item, Integer> valids = validItems.validItems();
-            if (valids == null || valids.isEmpty()) {
+            BiPredicate<ItemStack, Integer> valids = validItems.validItems();
+            if (valids == null) {
                 return super.insertItem(slot, stack, simulate);
             }
-            if (!valids.containsKey(stack.getItem())) {
-                return stack;
-            }
-            if (valids.get(stack.getItem()) != slot || valids.get(stack.getItem()) == -1) {
-                return stack;
-            }
-            return super.insertItem(slot, stack, simulate);
+            return valids.test(stack, slot) ? super.insertItem(slot, stack, simulate) : stack;
         }
     }
 }

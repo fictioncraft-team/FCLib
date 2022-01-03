@@ -43,6 +43,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.Tags;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
@@ -493,8 +494,8 @@ public class JsonSerializer {
             int amount = jsonIn.getAmount();
             String nbt = jsonIn.getNbt();
 
-            if (!jsonIn.isTag()) {
-                if (MiscHelper.isStringValid(name)) {
+            if (MiscHelper.isStringValid(name)) {
+                if (!jsonIn.isTag()) {
                     ResourceLocation rl = new ResourceLocation(name);
                     Fluid fluid = ForgeRegistries.FLUIDS.getValue(rl);
                     if (MiscHelper.isFluidValid(fluid)) {
@@ -511,8 +512,10 @@ public class JsonSerializer {
                         return new FluidStack(fluid, 1);
                     }
                 }
+            } else {
                 logger.warn("Provided fluid name is invalid {}", name);
             }
+
             return FluidStack.EMPTY;
         }
 
@@ -1131,6 +1134,7 @@ public class JsonSerializer {
             }
             return false;
         }
+
     }
 
     public static boolean isModWildCard(ISimpleObjProvider jsonIn) {

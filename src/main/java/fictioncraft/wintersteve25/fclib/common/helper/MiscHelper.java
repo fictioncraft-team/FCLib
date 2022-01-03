@@ -9,8 +9,10 @@ import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
+import net.minecraft.particles.IParticleData;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.fluids.FluidStack;
 
@@ -21,6 +23,10 @@ public class MiscHelper {
     public static final int INT_MAX = 2147483647;
     public static final int INT_MIN = -2147483647;
     public static final double ONEPIXEL = 1D/16;
+
+    public static <T extends IParticleData> void spawnParticle(ServerWorld world, T type, double posX, double posY, double posZ, int particleCount, double xOffset, double yOffset, double zOffset, double speed) {
+        world.spawnParticle(type, posX, posY, posZ, particleCount, xOffset, yOffset, zOffset, speed);
+    }
 
     public static boolean isStringValid(String in) {
         return in != null && !in.isEmpty();

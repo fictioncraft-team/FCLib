@@ -24,6 +24,7 @@ import net.minecraftforge.items.wrapper.InvWrapper;
 import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.BiPredicate;
 
 public class FCLibContainer extends Container {
 
@@ -253,7 +254,7 @@ public class FCLibContainer extends Container {
         return 0;
     }
 
-    public HashMap<Item, Integer> validItems() {
+    public BiPredicate<ItemStack, Integer> validItems() {
         if (tileEntity instanceof IHasValidItems) {
             IHasValidItems hasValidItems = (IHasValidItems) tileEntity;
             return hasValidItems.validItems();
