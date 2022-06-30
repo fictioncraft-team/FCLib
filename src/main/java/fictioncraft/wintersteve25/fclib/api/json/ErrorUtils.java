@@ -1,5 +1,6 @@
 package fictioncraft.wintersteve25.fclib.api.json;
 
+import fictioncraft.wintersteve25.fclib.FCLibConfig;
 import fictioncraft.wintersteve25.fclib.FCLibMod;
 import fictioncraft.wintersteve25.fclib.api.json.base.IJsonConfig;
 import fictioncraft.wintersteve25.fclib.api.json.objects.SimpleConfigObject;
@@ -23,12 +24,16 @@ public class ErrorUtils {
     private static final Map<String, IJsonConfig> cachedErrors = new HashMap<>();
 
     public static void sendError(TranslationTextComponent text, PlayerEntity player) {
-        player.sendMessage(text, player.getUniqueID());
+        if (FCLibConfig.SHOW_ERRORS_IN_CHAT.get()) {
+            player.sendMessage(text, player.getUniqueID());
+        }
         FCLibMod.logger.info(text);
     }
 
     public static void sendError(String text, PlayerEntity player, IJsonConfig config) {
-        player.sendMessage(new TranslationTextComponent(text, config.UID()), player.getUniqueID());
+        if (FCLibConfig.SHOW_ERRORS_IN_CHAT.get()) {
+            player.sendMessage(new TranslationTextComponent(text, config.UID()), player.getUniqueID());
+        }
         FCLibMod.logger.info(text);
     }
 
