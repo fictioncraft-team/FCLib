@@ -8,10 +8,10 @@ import net.minecraftforge.items.ItemStackHandler;
 import javax.annotation.Nonnull;
 import java.util.function.BiPredicate;
 
-public class ONIInventoryHandler extends ItemStackHandler {
+public class FCLibInventory extends ItemStackHandler {
     private final FCLibInvBE tile;
 
-    public ONIInventoryHandler(FCLibInvBE inv) {
+    public FCLibInventory(FCLibInvBE inv) {
         super(inv.getInvSize());
         tile = inv;
     }
@@ -26,8 +26,7 @@ public class ONIInventoryHandler extends ItemStackHandler {
         if (!(tile instanceof IHasValidItems validItems)) {
             return true;
         }
-        BiPredicate<ItemStack, Integer> valids = validItems.validItemsPredicate();
-        return valids.test(stack, slot);
+        return validItems.validItemsPredicate().test(stack, slot);
     }
 
     @Nonnull
@@ -36,7 +35,6 @@ public class ONIInventoryHandler extends ItemStackHandler {
         if (!(tile instanceof IHasValidItems validItems)) {
             return super.insertItem(slot, stack, simulate);
         }
-        BiPredicate<ItemStack, Integer> valids = validItems.validItemsPredicate();
-        return valids.test(stack, slot) ? super.insertItem(slot, stack, simulate) : stack;
+        return  validItems.validItemsPredicate().test(stack, slot) ? super.insertItem(slot, stack, simulate) : stack;
     }
 }

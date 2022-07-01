@@ -1,6 +1,6 @@
 package fictioncraft.wintersteve25.fclib.content.base.blocks;
 
-import fictioncraft.wintersteve25.fclib.utils.ONIInventoryHandler;
+import fictioncraft.wintersteve25.fclib.utils.FCLibInventory;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -17,7 +17,7 @@ import javax.annotation.Nullable;
 
 public abstract class FCLibInvBE extends FCLibBE {
 
-    protected final ItemStackHandler itemHandler = new ONIInventoryHandler(this);
+    protected final ItemStackHandler itemHandler = new FCLibInventory(this);
     protected final LazyOptional<IItemHandler> itemLazyOptional = LazyOptional.of(() -> itemHandler);
 
     public FCLibInvBE(BlockEntityType<?> te, BlockPos pos, BlockState state) {
