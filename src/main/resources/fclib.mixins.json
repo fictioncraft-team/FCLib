@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "package": "fictioncraft.wintersteve25.fclib.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "oniutils.refmap.json",
+  "mixins": [
+  ],
+  "server": [
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8"
+}
