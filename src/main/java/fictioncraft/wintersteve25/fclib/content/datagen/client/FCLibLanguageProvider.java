@@ -9,11 +9,13 @@ import net.minecraftforge.common.data.LanguageProvider;
 import org.apache.commons.lang3.text.WordUtils;
 
 public class FCLibLanguageProvider extends LanguageProvider {
-    private final FCLibDeferredRegister<?, ?, ?> register;
+    protected final FCLibDeferredRegister<?, ?, ?> register;
+    protected final String modID;
     
     public FCLibLanguageProvider(DataGenerator gen, String modid, FCLibBlockDeferredRegister register) {
         super(gen, modid, "en_us");
         this.register = register;
+        this.modID = modid;
     }
 
     @Override
@@ -29,7 +31,7 @@ public class FCLibLanguageProvider extends LanguageProvider {
             
             if (data instanceof FCLibItemDataGenContext context) {
                 if (context.isDoLangGen()) {
-                    add(register.getRegistryName() + "." + modid + "." + b.getName(), WordUtils.capitalizeFully(b.getName().replace("_", " ")));
+                    add(register.getRegistryName() + "." + modID + "." + b.getName(), WordUtils.capitalizeFully(b.getName().replace("_", " ")));
                 }
             }
         }

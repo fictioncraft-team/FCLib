@@ -6,7 +6,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
-import java.util.function.BiPredicate;
 
 public class FCLibInventory extends ItemStackHandler {
     private final FCLibInvBE tile;

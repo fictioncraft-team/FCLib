@@ -9,6 +9,7 @@ import fictioncraft.wintersteve25.fclib.content.registration.blocks.FCLibBlockRe
 import fictioncraft.wintersteve25.fclib.content.registration.data.FCLibBlockDataGenContext;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.RegistryObject;
 
 public class FCLibBlocks {
@@ -17,4 +18,9 @@ public class FCLibBlocks {
 
     public static final FCLibBlockRegistryObject<FCLibBoundingBlock, BlockItem> BOUNDING_BLOCK = BLOCKS.register("bounding_block", FCLibBoundingBlock::new, new FCLibBlockDataGenContext(false, false, false, false));
     public static final RegistryObject<BlockEntityType<FClibBoundingBE>> BOUNDING_TE = BLOCK_ENTITIES.registerBE(BOUNDING_BLOCK, FClibBoundingBE::new);
+
+    public static void register(IEventBus bus) {
+        BLOCKS.register(bus);
+        BLOCK_ENTITIES.register(bus);
+    }
 }

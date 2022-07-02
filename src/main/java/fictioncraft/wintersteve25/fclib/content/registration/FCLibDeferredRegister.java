@@ -13,7 +13,7 @@ public class FCLibDeferredRegister<T extends IForgeRegistryEntry<T>, REG_OBJ ext
     protected final DeferredRegister<T> register;
     protected final Map<REG_OBJ, DATA_CONTEXT> allRegisteredObjects;
     protected final String registryName;
-    
+
     public FCLibDeferredRegister(IForgeRegistry<T> registry, String modID) {
         this.registryName = registry.getRegistryName().getPath();
         this.register = DeferredRegister.create(registry, modID);
