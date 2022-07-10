@@ -23,8 +23,8 @@ public abstract class JsonConfig<T extends SimpleObjectMap> implements IJsonConf
     private T example;
 
     Logger logger = LogManager.getLogger("FCLibJsonConfigBuilder");
-    File configFile = JsonUtils.getConfigFile(UID().getNamespace(), false);
-    File exampleFile = JsonUtils.getConfigFile(UID().getNamespace(), true);
+    File configFile = getDefaultFile();
+    File exampleFile = getDefaultExample();
 
     @Override
     public void write() {

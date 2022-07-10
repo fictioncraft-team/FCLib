@@ -19,10 +19,10 @@ public interface IJsonConfig {
     SimpleObjectMap finishedConfig();
 
     default File getDefaultFile() {
-        return JsonUtils.getConfigFile(UID().getNamespace(), false);
+        return JsonUtils.getConfigFile(UID().toString().replace(':', '_').replace('/', '-'), false);
     }
 
     default File getDefaultExample() {
-        return JsonUtils.getConfigFile(UID().getNamespace(), true);
+        return JsonUtils.getConfigFile(UID().toString().replace(':', '_').replace('/', '-'), true);
     }
 }

@@ -46,16 +46,15 @@ public class JsonUtils {
         e.printStackTrace();
     }
 
-    public static File getConfigFile(String modid, boolean example) {
+    public static File getConfigFile(String identifier, boolean example) {
         if (ModListHelper.isPackModeLoaded()) {
-            return PackModeCompat.getPackModeConfigFile(modid, example);
+            return PackModeCompat.getPackModeConfigFile(identifier, example);
         }
-        return getConfigFile(modid, example, "Normal");
+        return getConfigFile(identifier, example, "Normal");
     }
 
-    public static File getConfigFile(String modid, boolean example, String packmode) {
-        String mode = packmode;
-        return example ? new File(directory.getPath() + File.separator + packmode + File.separator + modid + "_example.json") : new File(directory.getPath() + File.separator + packmode + File.separator + modid + ".json");
+    public static File getConfigFile(String identifier, boolean example, String packmode) {
+        return example ? new File(directory.getPath() + File.separator + packmode + File.separator + identifier + "_example.json") : new File(directory.getPath() + File.separator + packmode + File.separator + identifier + ".json");
     }
 
     public static void writeTemplateInConfig(PrintWriter writer, Object template, Logger logger) {
